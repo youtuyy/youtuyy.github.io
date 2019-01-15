@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Page</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script>
+function welcome() {	
+	if (!confirm("Then why did you come here??\nDo you want to stay?")) {
+        document.location.href = "lucky.html";
+    }
+}
+</script>
+</head>
+
+<body>
+<h1>Welcome to the magic decision maker</h1>
+<table align="center">
+<tr>
+<td>
+<div align="center">
+<img src="image/crystalwelcome.jpg" alt="crystal ball"/>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+<br />
+<form action="welcome2.html">
+<button type="submit" value="yes">Yes</button>
+<br /><br />
+<button type="button" value="no" onClick="welcome()">No </button>
+</form>
+</td>
+</tr>
+</table>
+</body>
+</html>

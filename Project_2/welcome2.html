@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Page</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script>
+function welcome() {
+	if(document.getElementById("name").value){
+	document.getElementById("welcome").innerHTML = ('Thank you for your trust, ' + document.getElementById("name").value 
+	+ '!' )
+	var value = document.getElementById("name").value
+	setCookie("name",value)
+	document.getElementById("day").style.visibility="visible"
+	}else{
+	alert("I want your name!")
+	}
+}
+
+function magic(){
+	if(document.getElementById("dayornight").value){
+	document.getElementById("magic").innerHTML = (document.getElementById("name").value + '! <a href=\"home.html\">  You can enter the magic world.</a>' )
+	var value2 = document.getElementById("dayornight").value
+	setCookie("pattern",value2)
+	}else{
+		alert("Please choose!")
+	}
+}
+</script>
+<script src="http://cs.smith.edu/~nhowe/teaching/csc105/examples/cookie.js"></script>
+</head>
+
+<body>
+<h1>Welcome to the magic decision maker</h1>
+<table align="center">
+<tr>
+<td>
+<div>
+<img src="image/crystalname.jpg" alt="crystal ball"/>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+<p>My name is  <input type="text" id="name" value="" onChange="welcome()"></input><form id="welcome">
+</form></p>
+</td>
+</tr>
+<tr id ="day">
+<td>
+<p>I want it to be  <select name="dayornight" id="dayornight" onChange="magic()">
+		<option value="" selected="selected">Day/Night</option>
+		<option value="day">Day</option>
+		<option value="night" >Night</option>
+		</select><form id="magic">
+</form></p>
+</td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,112 @@
+@charset "utf-8";
+/* CSS Document */
+body{
+	background-color:black;
+	color:white;
+	font-size:24px;
+}
+#pattern{
+	background-color:black;
+	color:white;
+	font-size:24px;
+}
+	
+#header{
+	height:15%;
+}
+
+hr{
+	color:orange;
+}
+
+#nav{
+	color:orange;
+	font-family:"Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+#nav a{
+	text-decoration:none;
+	display: block;
+    width: 200px;
+    text-align: center;
+    padding: 0px;
+    text-decoration: none; 
+}
+
+ul {
+    list-style-type: none;
+    overflow: hidden;
+    margin: auto;
+    float: center;
+    margin: 0;
+    text-align: cetner;    
+}
+
+li {
+	display: inline;
+    float: left;
+	margin: auto;
+	border-left:3px double orange;
+   	
+}
+
+.right{
+	float:right;
+	margin-right: 30px;
+	margin-top:20px;
+}
+
+.left{
+	float:left;
+	margin-left: 30px;
+	margin-top:20px;
+}
+
+h1{
+	font-family:"Palatino Linotype", "Book Antiqua", Palatino, serif;
+	color:white;
+	padding:10px;
+	text-align:center;
+	text-shadow: 2px 2px orange;
+	}
+	
+tr,td{
+	text-align:center;
+	border-style:double;
+	border-collapse:collapse;
+	border-color:orange;
+}
+table{
+	width:400px;
+	
+}
+
+a:link, a:visited{
+	color:white;
+}
+
+
+a:hover, a:active{
+	color:orange;
+	text-shadow:1px 2px 3px #FFF;
+	
+}
+
+p{
+	color:white;
+}
+#lucky{
+	color:black;
+}
+#day {
+	visibility:hidden;
+}
+#design {
+	text-align:left
+}
+#design li{
+	display: list-item;
+    float: left;
+	margin: auto;
+	border:none;
+}
+	

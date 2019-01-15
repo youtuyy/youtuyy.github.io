@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Magic</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script>
+function moveText(movingobject,cx,cy,rx,ry,dir) {
+  // moves the text sample
+	
+	// first, get current position
+	  x = document.getElementById(movingobject).style.left
+		y = document.getElementById(movingobject).style.top
+		// convert to integers
+		x = parseInt(x)
+		y = parseInt(y)
+	// compute angle
+	// track is a circle of radius 100 pixels, centered at (150,150).
+	theta = Math.atan2((y-cy)/ry,(x-cx)/rx)
+	
+	// compute new positions
+	// track is a circle of radius 100 pixels, centered at (150,150).
+	theta = theta+dir*Math.PI/72  // increase theta by 2.5 degrees
+	xnew = Math.round(cx+rx*Math.cos(theta))
+	ynew = Math.round(cy+ry*Math.sin(theta))
+	
+	// move text
+	  document.getElementById(movingobject).style.left = xnew+'px'
+		document.getElementById(movingobject).style.top = ynew+'px'
+}
+</script>
+</head>
+
+<body onLoad="setInterval('moveText(\'star\',500,200,75,75,1)',50); 
+setInterval('moveText(\'wizard1\',100,300,75,50,1)',50); 
+setInterval('moveText(\'wizard2\',600,150,50,150,-1)',50);
+setInterval('moveText(\'hat\',50,100,30,30,-1)',50)";>
+<audio src="music/relaxation_music.mp3" autoplay="autoplay" loop="loop">Audio error!</audio>
+<h1>Something is happening... Find the only leading star!</h1>
+<div>
+  <a href="decision.html"><img src="image/wizard.gif" height="100" id="star" style="position: relative; top:10px; left:30px;" /></a>
+  <img src="image/Wizard (1).gif" id="wizard1" style="position: relative; top:-20px; left:50px;" />
+    <img src="image/wizard (2).gif" id="wizard2" height="150" style="position: relative; top:-20px; left:50px;" />
+	<img src="image/Wizard-hat.gif" id="hat" height="140" style="position: relative; top:-20px; left:80px;" />
+<div/>
+<a href="decision.html" class="left">Skip</a>
+</body>
+</html>

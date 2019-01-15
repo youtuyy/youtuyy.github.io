@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Design Doc</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script src="http://cs.smith.edu/~nhowe/teaching/csc105/examples/cookie.js"></script>
+<script>
+function pattern(){
+	var pattern=getCookie("pattern")
+	if(pattern=="day"){
+		document.getElementById("pattern").style.backgroundColor="#7BD8E1"
+		document.getElementById("pattern").style.color="black"
+	}
+}
+
+
+function playSound(id) {
+	document.getElementById(id).volume = 0.25
+	document.getElementById(id).play()
+	
+}
+
+</script>
+
+
+</head>
+
+<body id="pattern" onLoad="pattern()">
+<audio src="music/magic_spell_trick_sound_001.mp3" id="sound1" preload="auto">Unsupported audio!</audio>
+<div class="header">
+<a href="home.html"><img src="image/logo.gif" alt="logo" class="right" onmouseover="playSound('sound1')"/></a>
+<h1>Magic Decision Maker</h1>
+<hr />
+</div>
+<div id="nav">
+	 <ul>
+     	<li><a href="home.html">Home</a>
+		<li><a href="Welcome.html">StartOver</a>
+		<li><a href="welcome2.html">SetUp</a>
+		<li><a href="lucky.html">LuckyNumber</a>
+        <li><a href="design.html">DesignDoc</a>
+	</ul>
+</div>
+<div id="content" align="center">
+<br />
+<br />
+<div id="design">
+<h1>Project 2 Design Document</h1>
+<hr width="60%">
+<h2>Mission Statement</h2>
+	<ul>
+    	<li>Help people make decisions in a random way.</li>
+        <li>Interesting interaction with the user. Good user experience.</li>
+        <li>Goodlooking pages.</li>
+     </ul>
+<h2>Required Elements</h2>
+<h3>Forms</h3>
+	<ul>
+		<li>Ask yes/no on the <a href="welcome.html" target="_blank">first welcome page</a>. Use javascipt to show an alert box. </li>
+		<li>Input name and selector on the <a href="welcome2.html" target="_blank">second welcome page</a>. Use "onchange" to avoid submit button. User can't submit if he leaves it blank. Use javascript to make a paragraph visible.</li>
+		<li>When let the user enter the question, the number of choices and the choices on <a href="home.html" target="_blank">home page</a> and the <a href="home.html" target="_blank">decider page</a>.</li>
+	</ul>
+<h3>Cookies</h3>
+	<ul>
+		<li>Set cookie for the name and the day/night pattern on the <a href="welcome2.html" target="_blank">second welcome page</a>. So user can customized the page afterwards. </li>
+		<li>Set cookie for the question and the number of choices on the <a href="home.html" target="_blank">home page</a>.</li>
+        <li>Set cookie for the random answer on the <a href="decider.html" target="_blank">decider page</a>.</li>
+	</ul>
+<h3>Interaction</h3>
+	<ul>
+		<li>The ball on the top-left on several page will turn on music when hover.</li>
+	    <li>The ball on the <a href="decider.html" target="_blank">decider page</a> will turn on music when hover. </li>
+        <li>The pattern of the pages. (day/night)</li>
+	    <li>Find the star on the <a href="magic.html" target="_blank">magic page</a></li>
+	    <li>Input name and selector on the <a href="welcome2.html" target="_blank">second welcome page</a>.</li>
+	</ul>
+<h3>User Feedback</h3>
+	<ul>
+		<li>On links. Ball's mouseover music effects.</li>
+	    <li>On the <a href="decider.html" target="_blank">decider page</a>, the number of choices will be set bt user. </li>
+	    <li>On the <a href="home.html" target="_blank">decider page</a> will turn on music when hover. And the number of choices will be set bt user.</li>
+        <li>User gets the random answer on the <a href="decision.html" target="_blank">decision page</a> </li>
+        <li>User gets a random lucky number on the <a href="lucky.html" target="_blank">luckynumber page</a> </li>
+	</ul>
+<h3>Multimedia</h3>
+	<ul>
+    	<li>Background music on the <a href="magic.html" target="_blank">magic page</a></li>
+        <li>Ball's mouseover music effects on the <a href="decider.html" target="_blank">decider page</a> and the top-left ball's music effect on several pages</li>
+        </ul>
+<h3>Elements from Project 1</h3>
+	<ul>
+		<li><a href="style.css">Style sheet</a>Using differnt selectors.</li>
+	    <li>Links are used where appropriate</li>
+	    <li>Images are used all over and are an integral part of the site as a whole.</li>
+        <li>Navigation bar after the welcome pages.</li>
+        <li>A consisant style. Carefully chosen colors.</li>
+        <li>A lot of functional javascript.</li>
+    </ul>
+<h3>Other Things</h3>
+	<ul>
+	    <li>Flying subjects on the <a href="magic.html" target="_blank">magic page</a>--Javascript. Edited from the code of A Smith Mystery. Thanks to their great work!</li>
+        <li>The ball's onclick on the <a href="decider.html" target="_blank">decider page</a> sometimes does not work in chrome. Some inter-page cookies do not work in chrome.</li>
+	</ul>
+
+
+</div>
+
+</body>
+</html>

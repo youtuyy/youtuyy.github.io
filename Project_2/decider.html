@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Decider</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<script src="http://cs.smith.edu/~nhowe/teaching/csc105/examples/cookie.js"></script>
+<script>
+function pattern(){
+	var pattern=getCookie("pattern")
+	if(pattern=="day"){
+		document.getElementById("pattern").style.backgroundColor="#7BD8E1"
+		document.getElementById("pattern").style.color="black"
+	}
+}
+
+function choice(){
+	var count=Number(getCookie("count"))
+	var num = Math.floor(count*Math.random())
+	var id = "choice"+String(num)
+	setCookie("answer",document.getElementById(id).value)
+	document.location.href = "magic.html"
+}
+	
+function bigImg(x) {
+    x.style.height = "275px";
+    x.style.width = "250px";
+	document.getElementById("sound2").volume = 0.25
+	document.getElementById("sound2").play()
+}
+
+function normalImg(x) {
+    x.style.height = "110px";
+    x.style.width = "100px";
+}
+
+
+function playSound(id) {
+	document.getElementById(id).volume = 0.25
+	document.getElementById(id).play()
+	
+}
+
+
+</script>
+
+
+</head>
+
+<body id="pattern" onload="pattern()">
+<audio src="music/magic_spell_trick_sound_001.mp3" id="sound1" preload="auto">Unsupported audio!</audio>
+<audio src="music/magic_spell_trick_sound_002.mp3" id="sound2" preload="auto">Unsupported audio!</audio>
+<div class="header">
+<a href="home.html"><img src="image/logo.gif" alt="logo" class="right" onmouseover="playSound('sound1')"/></a>
+<h1>Magic Decision Maker</h1>
+<hr />
+</div>
+<div id="nav">
+	 <ul>
+     	<li><a href="home.html">Home</a>
+		<li><a href="Welcome.html">StartOver</a>
+		<li><a href="welcome2.html">SetUp</a>
+		<li><a href="lucky.html">LuckyNumber</a>
+        <li><a href="design.html">DesignDoc</a>
+	</ul>
+</div>
+<div id="content" align="center">
+<br />
+<br />
+<table>
+<tr>
+<td>
+<script>
+
+if (cookieExists("question")) {
+	var question = getCookie("question")
+	var name = getCookie("name")
+	document.writeln("Your question:"+question)
+} else {
+	document.writeln("You can't tell the question,"+name+".")
+}
+
+
+</script>
+<br /><br />
+</td></tr>
+
+<tr>
+<td>
+<form method ="get">
+<script>
+	var count=Number(getCookie("count"))
+	for (i = 1; i <= count; i++) { 
+    document.writeln("Choice  "+i+"  <input type='text' name='choice"+i+"' id='choice"+i+"' value=''/> <br/><br/>")
+	}
+
+</script>
+Now it is time for the magic. <br />
+Soon you will now what to do.<br />
+Click the ball when you are ready.<br />
+<img type="image" src="image/logob.gif" style="width:100px;height:110px;" onclick="choice()" onmouseover="bigImg(this)" onmouseout="normalImg(this)"/>
+</form>
+
+
+</td>
+</tr>
+</table>
+
+</div>
+</body>
+</html>
