@@ -142,30 +142,56 @@
             width: 100% !important;
         }
 
-        /* Playback Controls */
+        /* ABCJS Synth Controller */
+        .abcjs-inline-audio {
+            background: #f0f0f0 !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            margin: 0.6em 0 !important;
+        }
+        .abcjs-inline-audio .abcjs-btn {
+            background: #6c63ff !important;
+            border: none !important;
+            border-radius: 50% !important;
+            width: 32px !important;
+            height: 32px !important;
+        }
+        .abcjs-inline-audio .abcjs-btn svg {
+            fill: #fff !important;
+        }
+        .abcjs-inline-audio .abcjs-midi-progress-background {
+            background: #ddd !important;
+            border-radius: 4px !important;
+        }
+        .abcjs-inline-audio .abcjs-midi-progress-indicator {
+            background: #6c63ff !important;
+            border-radius: 4px !important;
+        }
+
+        /* Download button */
         .playback-controls {
             display: flex;
             gap: 0.5em;
-            margin: 0.6em 0 0;
+            margin: 0.4em 0 0;
         }
-        .playback-controls button {
-            padding: 0.5em 1.1em;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.06);
-            color: inherit;
-            font-family: inherit;
-            font-size: 0.85em;
+        .playback-controls button,
+        .playback-controls button:hover {
+            padding: 0.4em 0.9em !important;
+            border-radius: 6px !important;
+            border: 1px solid rgba(0,0,0,0.12) !important;
+            background: #f5f5f5 !important;
+            color: #555 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
             cursor: pointer;
-            transition: all 0.2s ease;
+            line-height: 1.4 !important;
+            height: auto !important;
         }
         .playback-controls button:hover {
-            background: rgba(108, 99, 255, 0.15);
-            border-color: rgba(108, 99, 255, 0.3);
-        }
-        .playback-controls button.playing {
-            background: rgba(108, 99, 255, 0.25);
-            border-color: rgba(108, 99, 255, 0.5);
+            background: #e8e8e8 !important;
         }
 
         /* Input Area */
@@ -418,12 +444,12 @@
 
             if (abc) {
                 abcStore[scoreId] = abc;
+                var audioId = 'audio-' + scoreId;
                 html +=
                     '<div class="score-container" id="' + scoreId + '"></div>' +
+                    '<div class="playback-controls" id="' + audioId + '"></div>' +
                     '<div class="playback-controls">' +
-                    '<button onclick="playScore(\'' + scoreId + '\', this)">&#9654; Play</button>' +
-                    '<button onclick="stopScore()">&#9632; Stop</button>' +
-                    '<button onclick="downloadScore(\'' + scoreId + '\')">&#8615; Download SVG</button>' +
+                    '<button onclick="downloadScore(\'' + scoreId + '\')">Download SVG</button>' +
                     '</div>';
             }
             html += '</div>';
@@ -432,68 +458,27 @@
             container.scrollTop = container.scrollHeight;
 
             if (abc) {
-                ABCJS.renderAbc(scoreId, abc, {
+                var visualObj = ABCJS.renderAbc(scoreId, abc, {
                     responsive: 'resize',
                     staffwidth: 700,
                     paddingtop: 10,
                     paddingbottom: 10
                 });
-            }
-        }
-
-        async function playScore(scoreId, btn) {
-            stopScore();
-            const abc = abcStore[scoreId];
-            if (!abc) return;
-
-            try {
-                // AudioContext must be created from a user gesture
-                if (!window.audioContext) {
-                    window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Set up audio player
+                var audioId = 'audio-' + scoreId;
+                if (ABCJS.synth && ABCJS.synth.supportsAudio()) {
+                    var synthControl = new ABCJS.synth.SynthController();
+                    synthControl.load('#' + audioId, null, {
+                        displayRestart: true,
+                        displayPlay: true,
+                        displayProgress: true
+                    });
+                    synthControl.setTune(visualObj[0], false);
                 }
-
-                var visualObj = ABCJS.renderAbc(scoreId, abc, {
-                    responsive: 'resize',
-                    staffwidth: 700
-                });
-
-                currentSynth = new ABCJS.synth.CreateSynth();
-                await currentSynth.init({
-                    visualObj: visualObj[0],
-                    audioContext: window.audioContext,
-                    millisecondsPerMeasure: visualObj[0].millisecondsPerMeasure()
-                });
-                await currentSynth.prime();
-                currentSynth.start();
-                btn.innerHTML = '&#9654; Playing...';
-                btn.classList.add('playing');
-
-                // Check when playback ends
-                var duration = currentSynth.audioBuffers && currentSynth.audioBuffers.length > 0
-                    ? currentSynth.audioBuffers[0].duration * 1000
-                    : 30000;
-                setTimeout(function() {
-                    btn.innerHTML = '&#9654; Play';
-                    btn.classList.remove('playing');
-                }, duration + 500);
-            } catch (err) {
-                console.error('Playback error:', err);
-                btn.innerHTML = '&#9654; Play';
-                btn.classList.remove('playing');
-                appendError('Playback error: ' + err.message);
             }
         }
 
-        function stopScore() {
-            if (currentSynth) {
-                try { currentSynth.stop(); } catch(e) {}
-                currentSynth = null;
-            }
-            document.querySelectorAll('.playback-controls button:first-child').forEach(function(b) {
-                b.innerHTML = '&#9654; Play';
-                b.classList.remove('playing');
-            });
-        }
+        // Playback handled by ABCJS SynthController
 
         function downloadScore(scoreId) {
             const el = document.getElementById(scoreId);
