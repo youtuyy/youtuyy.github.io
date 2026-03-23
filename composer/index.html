@@ -446,34 +446,41 @@
             const abc = abcStore[scoreId];
             if (!abc) return;
 
-            if (ABCJS.synth && ABCJS.synth.supportsAudio()) {
-                try {
-                    const visualObj = ABCJS.renderAbc(scoreId, abc, {
-                        responsive: 'resize',
-                        staffwidth: 700
-                    });
+            try {
+                // AudioContext must be created from a user gesture
+                if (!window.audioContext) {
+                    window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
 
-                    currentSynth = new ABCJS.synth.CreateSynth();
-                    await currentSynth.init({ visualObj: visualObj[0] });
-                    await currentSynth.prime();
-                    currentSynth.start();
-                    btn.innerHTML = '&#9654; Playing...';
-                    btn.classList.add('playing');
+                var visualObj = ABCJS.renderAbc(scoreId, abc, {
+                    responsive: 'resize',
+                    staffwidth: 700
+                });
 
-                    const checkDone = setInterval(function() {
-                        if (!currentSynth || (currentSynth.getIsRunning && !currentSynth.getIsRunning())) {
-                            btn.innerHTML = '&#9654; Play';
-                            btn.classList.remove('playing');
-                            clearInterval(checkDone);
-                        }
-                    }, 500);
-                } catch (err) {
-                    console.error('Playback error:', err);
+                currentSynth = new ABCJS.synth.CreateSynth();
+                await currentSynth.init({
+                    visualObj: visualObj[0],
+                    audioContext: window.audioContext,
+                    millisecondsPerMeasure: visualObj[0].millisecondsPerMeasure()
+                });
+                await currentSynth.prime();
+                currentSynth.start();
+                btn.innerHTML = '&#9654; Playing...';
+                btn.classList.add('playing');
+
+                // Check when playback ends
+                var duration = currentSynth.audioBuffers && currentSynth.audioBuffers.length > 0
+                    ? currentSynth.audioBuffers[0].duration * 1000
+                    : 30000;
+                setTimeout(function() {
                     btn.innerHTML = '&#9654; Play';
                     btn.classList.remove('playing');
-                }
-            } else {
-                appendError('Audio playback is not supported in this browser.');
+                }, duration + 500);
+            } catch (err) {
+                console.error('Playback error:', err);
+                btn.innerHTML = '&#9654; Play';
+                btn.classList.remove('playing');
+                appendError('Playback error: ' + err.message);
             }
         }
 
