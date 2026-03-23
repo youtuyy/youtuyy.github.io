@@ -53,6 +53,16 @@
                             <h1>Project</h1>
                             <div>
                                 <div class="inner">
+                                    <h2 id="agent">Conversation Segmentation for Multi-Tenant Agents</h2>
+                                    <b>Conversation Segmentation</b> is an architecture I invented for handling multi-tenant agent communication. In production agentic systems, a single AI agent receives interleaved messages from multiple sources — end users, orchestrator agents, and tool-calling agents. Without segmentation, contexts bleed across tenants. My approach classifies each incoming message by tenant identity and conversational context, routing it to an isolated thread with its own state — enabling true multi-tenant operation without cross-contamination.
+                                    <p></p>
+                                    <p><a href="agent/">Interactive Demo</a>
+                                    </p>
+                                    <p>
+                                    - Multi-Agent Systems, Context Isolation, A2A Protocol, Agentic AI Architecture</p>
+                                </div>
+                                <hr />
+                                <div class="inner">
                                     <h2 id="composer">AI Music Composer</h2>
                                     <b>AI Music Composer</b> is a web application that generates original classical music from natural language descriptions. Describe a mood, style, or composer influence, and the AI composes music rendered as interactive sheet music with in-browser playback. Built with Claude API, Vercel serverless functions, and abcjs.
                                     <p></p>

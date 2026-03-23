@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Conversation Segmentation — Zhaoyan Lin</title>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+    <style>
+        .agent-hero { text-align: center; padding: 1.6em 1em 0.8em; }
+        .agent-hero h1 {
+            font-size: 2em; margin-bottom: 0.25em;
+            background: linear-gradient(135deg, #f2849e, #e8637a, #d4a0b0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .agent-hero .subtitle { font-size: 0.92em; opacity: 0.6; max-width: 540px; margin: 0 auto; line-height: 1.6; }
+        .agent-hero .tech-badge {
+            display: inline-block; margin: 1em 0.25em 0; padding: 0.25em 0.7em;
+            border-radius: 20px; font-size: 0.68em;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); opacity: 0.45;
+        }
+
+        /* Problem/Solution section */
+        .explainer {
+            max-width: 780px; margin: 1.5em auto; padding: 0 1em;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em;
+        }
+        .explainer-card {
+            padding: 1.2em 1.4em; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03);
+        }
+        .explainer-card h3 {
+            font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.1em;
+            opacity: 0.5; margin-bottom: 0.6em;
+        }
+        .explainer-card p { font-size: 0.88em; line-height: 1.65; opacity: 0.75; }
+        @media (max-width: 600px) { .explainer { grid-template-columns: 1fr; } }
+
+        /* Visualizer */
+        .viz-container {
+            max-width: 920px; margin: 1.5em auto; padding: 0 0.8em;
+        }
+        .viz-controls {
+            text-align: center; margin-bottom: 1em;
+        }
+        .viz-btn {
+            display: inline-block; padding: 0.4em 1.2em; border-radius: 20px;
+            font-size: 0.82em; cursor: pointer; transition: all 0.2s ease;
+            border: 1px solid rgba(242, 132, 158, 0.3); background: rgba(242, 132, 158, 0.08);
+            color: #f2849e; margin: 0 0.3em; user-select: none;
+        }
+        .viz-btn:hover { background: rgba(242, 132, 158, 0.18); }
+        .viz-btn.active { background: rgba(242, 132, 158, 0.25); border-color: rgba(242, 132, 158, 0.5); }
+        .speed-label { font-size: 0.72em; opacity: 0.4; margin: 0 0.5em; }
+
+        .viz-grid {
+            display: grid; grid-template-columns: 1fr 80px 1fr; gap: 0;
+            min-height: 420px;
+        }
+        @media (max-width: 700px) {
+            .viz-grid { grid-template-columns: 1fr; min-height: auto; }
+            .viz-middle { transform: rotate(90deg); height: 60px; }
+        }
+
+        /* Incoming stream */
+        .viz-panel {
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            background: rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column;
+        }
+        .viz-panel-header {
+            padding: 0.6em 0.9em; font-size: 0.7em; text-transform: uppercase;
+            letter-spacing: 0.12em; opacity: 0.4; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .viz-panel-body {
+            flex: 1; overflow-y: auto; padding: 0.6em;
+            max-height: 380px;
+        }
+
+        /* Messages */
+        .msg {
+            padding: 0.45em 0.7em; margin-bottom: 0.35em; border-radius: 8px;
+            font-size: 0.78em; line-height: 1.5; animation: msgIn 0.35s ease;
+            border-left: 3px solid transparent;
+        }
+        @keyframes msgIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+        .msg .msg-sender { font-weight: 700; font-size: 0.8em; margin-bottom: 0.15em; }
+        .msg .msg-text { opacity: 0.75; }
+
+        /* Tenant colors */
+        .tenant-0 { border-left-color: #5bb5e0; background: rgba(91, 181, 224, 0.08); }
+        .tenant-0 .msg-sender { color: #5bb5e0; }
+        .tenant-1 { border-left-color: #f2849e; background: rgba(242, 132, 158, 0.08); }
+        .tenant-1 .msg-sender { color: #f2849e; }
+        .tenant-2 { border-left-color: #8bc78b; background: rgba(139, 199, 139, 0.08); }
+        .tenant-2 .msg-sender { color: #8bc78b; }
+        .tenant-3 { border-left-color: #d4a76a; background: rgba(212, 167, 106, 0.08); }
+        .tenant-3 .msg-sender { color: #d4a76a; }
+
+        /* Middle arrow area */
+        .viz-middle {
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+        }
+        .seg-arrow {
+            width: 40px; height: 40px; opacity: 0.25;
+            transition: opacity 0.3s;
+        }
+        .seg-arrow.active { opacity: 0.8; }
+        .seg-arrow svg { width: 100%; height: 100%; fill: #f2849e; }
+        .seg-label {
+            font-size: 0.55em; text-transform: uppercase; letter-spacing: 0.15em;
+            opacity: 0.35; margin-top: 0.5em; text-align: center; line-height: 1.4;
+        }
+
+        /* Segmented threads */
+        .thread-tabs {
+            display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .thread-tab {
+            flex: 1; padding: 0.5em 0.4em; font-size: 0.65em; text-align: center;
+            cursor: pointer; opacity: 0.4; transition: all 0.2s;
+            border-bottom: 2px solid transparent; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .thread-tab:hover { opacity: 0.6; }
+        .thread-tab.active { opacity: 0.9; }
+        .thread-tab.tab-0 { color: #5bb5e0; }
+        .thread-tab.tab-0.active { border-bottom-color: #5bb5e0; }
+        .thread-tab.tab-1 { color: #f2849e; }
+        .thread-tab.tab-1.active { border-bottom-color: #f2849e; }
+        .thread-tab.tab-2 { color: #8bc78b; }
+        .thread-tab.tab-2.active { border-bottom-color: #8bc78b; }
+        .thread-tab.tab-3 { color: #d4a76a; }
+        .thread-tab.tab-3.active { border-bottom-color: #d4a76a; }
+
+        .thread-panel { display: none; }
+        .thread-panel.active { display: block; }
+
+        /* Chaos mode */
+        .chaos-msg {
+            padding: 0.45em 0.7em; margin-bottom: 0.35em; border-radius: 8px;
+            font-size: 0.78em; line-height: 1.5; animation: msgIn 0.35s ease;
+            background: rgba(255,255,255,0.03); border-left: 3px solid rgba(255,255,255,0.1);
+        }
+        .chaos-msg .msg-sender { font-weight: 700; font-size: 0.8em; margin-bottom: 0.15em; opacity: 0.5; }
+        .chaos-msg .msg-text { opacity: 0.5; }
+
+        /* Shared memory */
+        .shared-memory {
+            max-width: 920px; margin: 1.2em auto 0; padding: 0 0.8em;
+        }
+        .memory-panel {
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            background: rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .memory-header {
+            padding: 0.5em 0.9em; font-size: 0.7em; text-transform: uppercase;
+            letter-spacing: 0.12em; opacity: 0.4; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; gap: 0.5em;
+        }
+        .memory-header .mem-icon { opacity: 0.6; }
+        .memory-body {
+            padding: 0.5em 0.7em; min-height: 40px; max-height: 140px; overflow-y: auto;
+        }
+        .mem-entry {
+            display: flex; align-items: baseline; gap: 0.6em;
+            padding: 0.3em 0.5em; margin-bottom: 0.25em; border-radius: 6px;
+            font-size: 0.75em; animation: memIn 0.4s ease;
+        }
+        @keyframes memIn { from { opacity: 0; background: rgba(242, 132, 158, 0.15); } to { opacity: 1; background: transparent; } }
+        .mem-entry.flash { animation: memFlash 0.6s ease; }
+        @keyframes memFlash { 0% { background: rgba(242, 132, 158, 0.25); } 100% { background: transparent; } }
+        .mem-key {
+            font-weight: 700; color: #f2849e; opacity: 0.7; white-space: nowrap;
+            font-family: monospace; font-size: 0.95em;
+        }
+        .mem-val { opacity: 0.6; }
+        .mem-writer {
+            font-size: 0.85em; opacity: 0.35; margin-left: auto; white-space: nowrap;
+        }
+        .memory-body:empty::before {
+            content: "Shared state will populate as the simulation runs...";
+            display: block; opacity: 0.2; font-style: italic; font-size: 0.8em; padding: 0.5em 0;
+        }
+
+        /* Shared state badge in messages */
+        .state-badge {
+            display: inline-block; font-size: 0.75em; padding: 0.1em 0.5em;
+            border-radius: 10px; margin-top: 0.3em;
+            background: rgba(242, 132, 158, 0.1); border: 1px solid rgba(242, 132, 158, 0.2);
+            color: #f2849e; opacity: 0.8;
+        }
+        .state-badge.read { background: rgba(91, 181, 224, 0.1); border-color: rgba(91, 181, 224, 0.2); color: #5bb5e0; }
+
+        /* How it works */
+        .how-section {
+            max-width: 780px; margin: 2.5em auto 1em; padding: 0 1em;
+        }
+        .how-section h2 {
+            font-size: 1.1em; margin-bottom: 0.8em; opacity: 0.8;
+        }
+        .how-steps {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8em;
+        }
+        .how-step {
+            padding: 1em; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
+            text-align: center;
+        }
+        .how-step .step-num {
+            font-size: 1.4em; font-weight: 700; color: #f2849e; opacity: 0.6;
+            margin-bottom: 0.3em;
+        }
+        .how-step .step-title { font-size: 0.8em; font-weight: 700; margin-bottom: 0.3em; }
+        .how-step .step-desc { font-size: 0.72em; opacity: 0.5; line-height: 1.5; }
+        @media (max-width: 600px) { .how-steps { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+            <div class="inner">
+                <a href="../index.html" class="logo">
+                    <span class="symbol"><img src="../images/rabbit.svg" alt="" /></span>
+                    <span class="title">Zhaoyan Lin's Portfolio</span>
+                </a>
+                <nav><ul><li><a href="#menu">Menu</a></li></ul></nav>
+            </div>
+        </header>
+        <nav id="menu">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../project.html">Project</a></li>
+                <li><a href="../art.html">Art</a></li>
+                <li><a href="../other.html">Other</a></li>
+                <li><a href="../profile.html">Profile</a></li>
+            </ul>
+        </nav>
+
+        <div id="main">
+            <div class="inner">
+                <div class="agent-hero">
+                    <h1>Conversation Segmentation</h1>
+                    <p class="subtitle">When an AI agent talks to multiple tenants simultaneously — humans and other agents — how do you keep each conversation coherent? I invented a segmentation approach to solve this.</p>
+                    <span class="tech-badge">Multi-Tenant Agents</span>
+                    <span class="tech-badge">A2A Protocol</span>
+                    <span class="tech-badge">Context Isolation</span>
+                    <span class="tech-badge">Agentic AI</span>
+                </div>
+
+                <div class="explainer">
+                    <div class="explainer-card">
+                        <h3>The Problem</h3>
+                        <p>In production agentic systems, a single agent instance receives interleaved messages from multiple sources — end users, orchestrator agents, tool-calling agents — all in one stream. Without segmentation, contexts bleed across tenants: a response meant for User A leaks into Agent B's thread. The agent loses track of who said what and why.</p>
+                    </div>
+                    <div class="explainer-card">
+                        <h3>The Solution</h3>
+                        <p>Conversation segmentation classifies each incoming message by tenant identity and conversational context, routing it to an isolated thread with its own state. Critically, threads share a common memory layer — so an incident detected by a monitoring agent or a refund processed by billing can inform a customer conversation, without leaking unrelated context.</p>
+                    </div>
+                </div>
+
+                <div class="viz-container">
+                    <div class="viz-controls">
+                        <span class="viz-btn active" id="btn-segmented" onclick="setMode('segmented')">With Segmentation</span>
+                        <span class="viz-btn" id="btn-chaos" onclick="setMode('chaos')">Without Segmentation</span>
+                        <span class="speed-label">|</span>
+                        <span class="viz-btn" id="btn-play" onclick="togglePlay()">Play</span>
+                        <span class="viz-btn" id="btn-reset" onclick="resetViz()">Reset</span>
+                    </div>
+
+                    <div class="viz-grid">
+                        <!-- Left: incoming stream -->
+                        <div class="viz-panel">
+                            <div class="viz-panel-header">Incoming Message Stream</div>
+                            <div class="viz-panel-body" id="incoming-stream"></div>
+                        </div>
+
+                        <!-- Middle: segmentation engine -->
+                        <div class="viz-middle">
+                            <div class="seg-arrow" id="seg-arrow">
+                                <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                            </div>
+                            <div class="seg-label">Segment &amp;<br/>Route</div>
+                        </div>
+
+                        <!-- Right: segmented threads -->
+                        <div class="viz-panel">
+                            <div id="right-header">
+                                <div class="thread-tabs" id="thread-tabs">
+                                    <div class="thread-tab tab-0 active" onclick="switchThread(0)">Customer A</div>
+                                    <div class="thread-tab tab-1" onclick="switchThread(1)">Developer B</div>
+                                    <div class="thread-tab tab-2" onclick="switchThread(2)">Monitor Agent</div>
+                                    <div class="thread-tab tab-3" onclick="switchThread(3)">Billing Agent</div>
+                                </div>
+                            </div>
+                            <div class="viz-panel-body" id="segmented-output">
+                                <div class="thread-panel active" id="thread-0"></div>
+                                <div class="thread-panel" id="thread-1"></div>
+                                <div class="thread-panel" id="thread-2"></div>
+                                <div class="thread-panel" id="thread-3"></div>
+                                <div class="thread-panel" id="chaos-output" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shared-memory">
+                    <div class="memory-panel">
+                        <div class="memory-header">
+                            <span class="mem-icon">&#9671;</span> Shared Memory — Cross-Thread State
+                        </div>
+                        <div class="memory-body" id="shared-memory"></div>
+                    </div>
+                </div>
+
+                <!-- How it works -->
+                <div class="how-section">
+                    <h2>How It Works</h2>
+                    <div class="how-steps">
+                        <div class="how-step">
+                            <div class="step-num">1</div>
+                            <div class="step-title">Intercept</div>
+                            <div class="step-desc">Every incoming message is intercepted before reaching the agent's context window</div>
+                        </div>
+                        <div class="how-step">
+                            <div class="step-num">2</div>
+                            <div class="step-title">Classify</div>
+                            <div class="step-desc">Tenant identity and conversation thread are determined from message metadata and content</div>
+                        </div>
+                        <div class="how-step">
+                            <div class="step-num">3</div>
+                            <div class="step-title">Isolate</div>
+                            <div class="step-desc">Each tenant gets its own context window — but threads share a common memory layer for cross-cutting state</div>
+                        </div>
+                        <div class="how-step">
+                            <div class="step-num">4</div>
+                            <div class="step-title">Shared State</div>
+                            <div class="step-desc">Threads read and write to shared memory — so an incident from monitoring or a refund from billing can inform customer conversations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div class="inner">
+                <section>
+                    <h2>Follow</h2>
+                    <ul class="icons">
+                        <li><a href="https://www.instagram.com/youtuyy/" class="icon style2 fa-instagram"><span class="label">Instagram</span></a></li>
+                        <li><a href="https://github.com/youtuyy" class="icon style2 fa-github"><span class="label">GitHub</span></a></li>
+                        <li><a href="mailto:linzhaoyan@hotmail.com" class="icon style2 fa-envelope-o"><span class="label">Email</span></a></li>
+                    </ul>
+                </section>
+                <ul class="copyright"><li>&copy; Zhaoyan Lin 2026</li></ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/browser.min.js"></script>
+    <script src="../assets/js/breakpoints.min.js"></script>
+    <script src="../assets/js/util.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+        var tenants = [
+            { name: 'Customer A', type: 'Human' },
+            { name: 'Developer B', type: 'Human' },
+            { name: 'Monitor Agent', type: 'Agent' },
+            { name: 'Billing Agent', type: 'Agent' }
+        ];
+
+        var scenario = [
+            { tenant: 0, sender: 'Customer A', text: "Hi, what's the status of my order #4821?" },
+            { tenant: 2, sender: 'Monitor Agent', text: "[METRIC] API latency p99 = 342ms, threshold exceeded on /v2/orders endpoint.",
+              stateWrite: { key: 'system.incident', val: 'Latency spike on /v2/orders (p99=342ms)', writer: 'Monitor Agent' } },
+            { tenant: 1, sender: 'Developer B', text: "Hey, where can I find the docs for the batch processing API?" },
+            { tenant: 0, sender: 'Agent', text: "Let me look up order #4821 for you. One moment.", reply: true,
+              stateWrite: { key: 'order.4821.status', val: 'Lookup in progress', writer: 'Thread: Customer A' } },
+            { tenant: 3, sender: 'Billing Agent', text: "[REQUEST] Need authorization to process refund $127.50 for account ACC-9917." },
+            { tenant: 2, sender: 'Agent', text: "Acknowledged. Investigating /v2/orders latency spike. Checking recent deployments.", reply: true },
+            { tenant: 1, sender: 'Developer B', text: "Also, is there a rate limit on the batch endpoint?" },
+            { tenant: 0, sender: 'Agent', text: "Order #4821 shipped yesterday via FedEx. Tracking: FX-882910. Expected delivery: March 25. Note: we're monitoring a latency issue that may affect tracking updates.", reply: true,
+              stateRead: 'system.incident',
+              stateWrite: { key: 'order.4821.status', val: 'Shipped — FX-882910, ETA Mar 25', writer: 'Thread: Customer A' } },
+            { tenant: 3, sender: 'Agent', text: "Refund authorized for ACC-9917. Amount: $127.50. Processing via standard 3-5 day window.", reply: true,
+              stateWrite: { key: 'account.ACC-9917.refund', val: '$127.50 authorized, pending', writer: 'Thread: Billing Agent' } },
+            { tenant: 1, sender: 'Agent', text: "Batch API docs are at /docs/api/batch. Rate limit is 100 requests/min per API key.", reply: true },
+            { tenant: 2, sender: 'Monitor Agent', text: "[UPDATE] Latency normalized after auto-scaling. Current p99 = 89ms.",
+              stateWrite: { key: 'system.incident', val: 'Resolved — auto-scaled, p99=89ms', writer: 'Monitor Agent' } },
+            { tenant: 0, sender: 'Customer A', text: "Great, thanks! Can I also check if my refund went through?" },
+            { tenant: 3, sender: 'Billing Agent', text: "[CONFIRM] Refund processed. Transaction ID: TXN-55201.",
+              stateWrite: { key: 'account.ACC-9917.refund', val: '$127.50 processed — TXN-55201', writer: 'Billing Agent' } },
+            { tenant: 2, sender: 'Agent', text: "Good — latency resolved by auto-scaling. Logging incident for post-mortem review.", reply: true },
+            { tenant: 0, sender: 'Agent', text: "Your refund of $127.50 has been processed (TXN-55201). And the latency issue we mentioned has been resolved.", reply: true,
+              stateRead: 'account.ACC-9917.refund' },
+            { tenant: 1, sender: 'Developer B', text: "Perfect, that's exactly what I needed. Thanks!" },
+            { tenant: 1, sender: 'Agent', text: "Anytime! Let me know if you need help with the integration.", reply: true },
+        ];
+
+        var mode = 'segmented';
+        var playing = false;
+        var msgIndex = 0;
+        var timer = null;
+        var speed = 1200;
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btn-segmented').classList.toggle('active', m === 'segmented');
+            document.getElementById('btn-chaos').classList.toggle('active', m === 'chaos');
+
+            var tabs = document.getElementById('thread-tabs');
+            var threads = document.querySelectorAll('.thread-panel');
+
+            if (m === 'segmented') {
+                tabs.style.display = 'flex';
+                document.getElementById('chaos-output').style.display = 'none';
+                switchThread(0);
+            } else {
+                tabs.style.display = 'none';
+                threads.forEach(function(t) { t.classList.remove('active'); });
+                document.getElementById('chaos-output').style.display = 'block';
+                document.getElementById('chaos-output').classList.add('active');
+            }
+            resetViz();
+        }
+
+        function switchThread(idx) {
+            document.querySelectorAll('.thread-tab').forEach(function(t, i) {
+                t.classList.toggle('active', i === idx);
+            });
+            document.querySelectorAll('.thread-panel').forEach(function(p) {
+                p.classList.remove('active');
+            });
+            document.getElementById('thread-' + idx).classList.add('active');
+        }
+
+        function togglePlay() {
+            if (playing) {
+                pauseViz();
+            } else {
+                startViz();
+            }
+        }
+
+        function startViz() {
+            if (msgIndex >= scenario.length) resetViz();
+            playing = true;
+            document.getElementById('btn-play').textContent = 'Pause';
+            document.getElementById('btn-play').classList.add('active');
+            playNext();
+        }
+
+        function pauseViz() {
+            playing = false;
+            clearTimeout(timer);
+            document.getElementById('btn-play').textContent = 'Play';
+            document.getElementById('btn-play').classList.remove('active');
+        }
+
+        function resetViz() {
+            pauseViz();
+            msgIndex = 0;
+            document.getElementById('incoming-stream').innerHTML = '';
+            for (var i = 0; i < 4; i++) {
+                document.getElementById('thread-' + i).innerHTML = '';
+            }
+            document.getElementById('chaos-output').innerHTML = '';
+            document.getElementById('shared-memory').innerHTML = '';
+            document.getElementById('btn-play').textContent = 'Play';
+        }
+
+        function playNext() {
+            if (!playing || msgIndex >= scenario.length) {
+                pauseViz();
+                return;
+            }
+
+            var msg = scenario[msgIndex];
+            addIncoming(msg);
+
+            // Flash the arrow
+            var arrow = document.getElementById('seg-arrow');
+            arrow.classList.add('active');
+            setTimeout(function() { arrow.classList.remove('active'); }, 400);
+
+            // Add to right panel + shared state
+            setTimeout(function() {
+                if (mode === 'segmented') {
+                    addToThread(msg);
+                } else {
+                    addToChaos(msg);
+                }
+                if (msg.stateWrite) writeSharedState(msg.stateWrite);
+                if (msg.stateRead) flashSharedState(msg.stateRead);
+            }, 300);
+
+            msgIndex++;
+            timer = setTimeout(playNext, msg.reply ? speed * 0.7 : speed);
+        }
+
+        function addIncoming(msg) {
+            var stream = document.getElementById('incoming-stream');
+            var div = document.createElement('div');
+            div.className = 'msg tenant-' + msg.tenant;
+            var typeLabel = msg.reply ? 'Agent' : tenants[msg.tenant].type;
+            div.innerHTML = '<div class="msg-sender">' + escapeH(msg.sender) + ' <span style="opacity:0.4;font-weight:400;">(' + typeLabel + ')</span></div><div class="msg-text">' + escapeH(msg.text) + '</div>';
+            stream.appendChild(div);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function addToThread(msg) {
+            var thread = document.getElementById('thread-' + msg.tenant);
+            var div = document.createElement('div');
+            div.className = 'msg tenant-' + msg.tenant;
+            var badges = '';
+            if (msg.stateWrite) badges += '<div class="state-badge">wrote: ' + escapeH(msg.stateWrite.key) + '</div> ';
+            if (msg.stateRead) badges += '<div class="state-badge read">read: ' + escapeH(msg.stateRead) + '</div> ';
+            div.innerHTML = '<div class="msg-sender">' + escapeH(msg.sender) + '</div><div class="msg-text">' + escapeH(msg.text) + '</div>' + badges;
+            thread.appendChild(div);
+
+            // Auto-switch to active thread
+            switchThread(msg.tenant);
+            var body = document.getElementById('segmented-output');
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function addToChaos(msg) {
+            var chaos = document.getElementById('chaos-output');
+            var div = document.createElement('div');
+            div.className = 'chaos-msg';
+            div.innerHTML = '<div class="msg-sender">' + escapeH(msg.sender) + '</div><div class="msg-text">' + escapeH(msg.text) + '</div>';
+            chaos.appendChild(div);
+            var body = document.getElementById('segmented-output');
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function writeSharedState(entry) {
+            var mem = document.getElementById('shared-memory');
+            var existing = document.getElementById('mem-' + entry.key.replace(/\./g, '-'));
+            if (existing) {
+                existing.querySelector('.mem-val').textContent = entry.val;
+                existing.querySelector('.mem-writer').textContent = entry.writer;
+                existing.classList.remove('flash');
+                void existing.offsetWidth; // reflow to retrigger animation
+                existing.classList.add('flash');
+            } else {
+                var div = document.createElement('div');
+                div.className = 'mem-entry';
+                div.id = 'mem-' + entry.key.replace(/\./g, '-');
+                div.innerHTML = '<span class="mem-key">' + escapeH(entry.key) + '</span>' +
+                    '<span class="mem-val">' + escapeH(entry.val) + '</span>' +
+                    '<span class="mem-writer">' + escapeH(entry.writer) + '</span>';
+                mem.appendChild(div);
+            }
+            mem.scrollTop = mem.scrollHeight;
+        }
+
+        function flashSharedState(key) {
+            var el = document.getElementById('mem-' + key.replace(/\./g, '-'));
+            if (el) {
+                el.classList.remove('flash');
+                void el.offsetWidth;
+                el.classList.add('flash');
+            }
+        }
+
+        function escapeH(text) {
+            var d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+    </script>
+</body>
+</html>
