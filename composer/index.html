@@ -6,278 +6,129 @@
     <title>AI Music Composer — Zhaoyan Lin</title>
     <link rel="stylesheet" href="../assets/css/main.css" />
     <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-audio.css" />
     <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-basic.min.js"></script>
     <style>
-        /* Hero Section */
-        .composer-hero {
-            text-align: center;
-            padding: 2em 0 1em;
-        }
+        /* Hero */
+        .composer-hero { text-align: center; padding: 2em 0 1em; }
         .composer-hero h1 {
-            font-size: 2.5em;
-            margin-bottom: 0.2em;
+            font-size: 2.5em; margin-bottom: 0.2em;
             background: linear-gradient(135deg, #c9a0dc, #6c63ff, #48d1cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .composer-hero .subtitle {
-            font-size: 1.1em;
-            opacity: 0.7;
-            max-width: 550px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
+        .composer-hero .subtitle { font-size: 1.1em; opacity: 0.7; max-width: 550px; margin: 0 auto; line-height: 1.6; }
         .composer-hero .tech-badge {
-            display: inline-block;
-            margin: 1.2em 0.3em 0;
-            padding: 0.3em 0.8em;
-            border-radius: 20px;
-            font-size: 0.75em;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.04);
-            opacity: 0.6;
+            display: inline-block; margin: 1.2em 0.3em 0; padding: 0.3em 0.8em;
+            border-radius: 20px; font-size: 0.75em;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); opacity: 0.6;
         }
+        #composer-app { max-width: 820px; margin: 1.5em auto 0; }
 
-        /* App Container */
-        #composer-app {
-            max-width: 820px;
-            margin: 1.5em auto 0;
-        }
-
-        /* Suggestion Chips */
-        .suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6em;
-            justify-content: center;
-            margin-bottom: 2em;
-        }
-        .suggestions button {
-            padding: 0.65em 1.2em;
-            border-radius: 24px;
-            border: 1px solid rgba(200, 160, 220, 0.3);
-            background: linear-gradient(135deg, rgba(200, 160, 220, 0.08), rgba(108, 99, 255, 0.08));
-            color: inherit;
-            font-family: inherit;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: all 0.25s ease;
+        /* Suggestion chips — override Phantom template button styles */
+        .suggestions { display: flex; flex-wrap: wrap; gap: 0.6em; justify-content: center; margin-bottom: 2em; }
+        .suggestions button,
+        .suggestions button:hover {
+            padding: 0.55em 1.1em !important; border-radius: 24px !important;
+            border: 1px solid rgba(200, 160, 220, 0.3) !important;
+            background: linear-gradient(135deg, rgba(200, 160, 220, 0.08), rgba(108, 99, 255, 0.08)) !important;
+            color: inherit !important; font-family: inherit !important; font-size: 0.82em !important;
+            cursor: pointer; letter-spacing: 0 !important; text-transform: none !important;
+            font-weight: 400 !important; height: auto !important; line-height: 1.5 !important;
         }
         .suggestions button:hover {
-            background: linear-gradient(135deg, rgba(200, 160, 220, 0.2), rgba(108, 99, 255, 0.2));
-            border-color: rgba(200, 160, 220, 0.5);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, rgba(200, 160, 220, 0.2), rgba(108, 99, 255, 0.2)) !important;
+            border-color: rgba(200, 160, 220, 0.5) !important;
         }
 
-        /* Chat Area */
+        /* Chat */
         .chat-messages {
-            min-height: 120px;
-            max-height: 520px;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 1.8em;
-            margin-bottom: 1em;
+            min-height: 120px; max-height: 520px; overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+            padding: 1.8em; margin-bottom: 1em;
             background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.2));
-            backdrop-filter: blur(4px);
         }
         .chat-messages:empty::before {
             content: "Your compositions will appear here...";
-            display: block;
-            text-align: center;
-            opacity: 0.3;
-            padding: 3em 0;
-            font-style: italic;
+            display: block; text-align: center; opacity: 0.3; padding: 3em 0; font-style: italic;
         }
-        .chat-msg {
-            margin-bottom: 1.4em;
-            line-height: 1.65;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .chat-msg.user {
-            text-align: right;
-        }
-        .chat-msg .label {
-            font-size: 0.7em;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            opacity: 0.4;
-            margin-bottom: 0.4em;
-            font-weight: 700;
-        }
+        .chat-msg { margin-bottom: 1.4em; line-height: 1.65; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-msg.user { text-align: right; }
+        .chat-msg .label { font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.4; margin-bottom: 0.4em; font-weight: 700; }
         .chat-msg.user .bubble {
-            display: inline-block;
-            background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(108, 99, 255, 0.1));
-            border: 1px solid rgba(108, 99, 255, 0.3);
-            padding: 0.7em 1.2em;
-            border-radius: 16px 16px 4px 16px;
-            max-width: 75%;
-            text-align: left;
+            display: inline-block; background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(108, 99, 255, 0.1));
+            border: 1px solid rgba(108, 99, 255, 0.3); padding: 0.7em 1.2em;
+            border-radius: 16px 16px 4px 16px; max-width: 75%; text-align: left;
         }
         .chat-msg.assistant .bubble {
-            display: inline-block;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 0.7em 1.2em;
-            border-radius: 16px 16px 16px 4px;
-            max-width: 92%;
-            text-align: left;
+            display: inline-block; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08); padding: 0.7em 1.2em;
+            border-radius: 16px 16px 16px 4px; max-width: 92%; text-align: left;
         }
 
-        /* Score Display */
+        /* Score */
         .score-container {
-            background: #fefefe;
-            border-radius: 12px;
-            padding: 1.2em 1em;
-            margin: 1.2em 0 0.8em;
-            min-height: 80px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+            background: #fefefe; border-radius: 12px; padding: 1.2em 1em;
+            margin: 1.2em 0 0.4em; min-height: 80px; box-shadow: 0 2px 16px rgba(0,0,0,0.15);
         }
-        .score-container svg {
-            width: 100% !important;
-        }
+        .score-container svg { width: 100% !important; }
 
-        /* ABCJS Synth Controller */
+        /* ABCJS audio player widget */
+        .audio-container {
+            margin: 0.4em 0 0.6em;
+        }
         .abcjs-inline-audio {
-            background: #f0f0f0 !important;
             border-radius: 8px !important;
-            padding: 6px 10px !important;
-            margin: 0.6em 0 !important;
-        }
-        .abcjs-inline-audio .abcjs-btn {
-            background: #6c63ff !important;
-            border: none !important;
-            border-radius: 50% !important;
-            width: 32px !important;
-            height: 32px !important;
-        }
-        .abcjs-inline-audio .abcjs-btn svg {
-            fill: #fff !important;
-        }
-        .abcjs-inline-audio .abcjs-midi-progress-background {
-            background: #ddd !important;
-            border-radius: 4px !important;
-        }
-        .abcjs-inline-audio .abcjs-midi-progress-indicator {
-            background: #6c63ff !important;
-            border-radius: 4px !important;
         }
 
-        /* Download button */
-        .playback-controls {
-            display: flex;
-            gap: 0.5em;
-            margin: 0.4em 0 0;
+        /* Download button — override Phantom */
+        .dl-row { margin: 0.3em 0 0; }
+        .dl-row button,
+        .dl-row button:hover {
+            padding: 0.35em 0.8em !important; border-radius: 6px !important;
+            border: 1px solid rgba(0,0,0,0.12) !important; background: #f0f0f0 !important;
+            color: #666 !important; font-family: -apple-system, sans-serif !important;
+            font-size: 11px !important; font-weight: 500 !important;
+            letter-spacing: 0 !important; text-transform: none !important;
+            cursor: pointer; line-height: 1.4 !important; height: auto !important;
         }
-        .playback-controls button,
-        .playback-controls button:hover {
-            padding: 0.4em 0.9em !important;
-            border-radius: 6px !important;
-            border: 1px solid rgba(0,0,0,0.12) !important;
-            background: #f5f5f5 !important;
-            color: #555 !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-            font-size: 12px !important;
-            font-weight: 500 !important;
-            letter-spacing: 0 !important;
-            text-transform: none !important;
-            cursor: pointer;
-            line-height: 1.4 !important;
-            height: auto !important;
-        }
-        .playback-controls button:hover {
-            background: #e8e8e8 !important;
-        }
+        .dl-row button:hover { background: #e0e0e0 !important; }
 
-        /* Input Area */
+        /* Input */
         .input-row {
-            display: flex;
-            gap: 0.6em;
-            background: rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 0.4em;
+            display: flex; gap: 0.6em; background: rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 0.4em;
         }
         .input-row input {
-            flex: 1;
-            padding: 0.85em 1.1em;
-            border-radius: 10px;
-            border: none;
-            background: transparent;
-            color: inherit;
-            font-family: inherit;
-            font-size: 1em;
-            outline: none;
+            flex: 1; padding: 0.85em 1.1em; border-radius: 10px; border: none;
+            background: transparent; color: inherit; font-family: inherit; font-size: 1em; outline: none;
         }
-        .input-row input::placeholder {
-            opacity: 0.35;
-        }
+        .input-row input::placeholder { opacity: 0.35; }
         .input-row button {
-            padding: 0.85em 2em;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(135deg, #6c63ff, #9b59b6);
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.95em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            letter-spacing: 0.02em;
+            padding: 0.85em 2em; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #6c63ff, #9b59b6); color: #fff;
+            font-family: inherit; font-size: 0.95em; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.02em;
         }
         .input-row button:hover {
             background: linear-gradient(135deg, #5a52d5, #8e44ad);
-            transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
         }
-        .input-row button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+        .input-row button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Typing Indicator */
-        .typing-indicator {
-            display: inline-flex;
-            gap: 4px;
-            padding: 4px 0;
-        }
-        .typing-indicator span {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.4);
-            animation: pulse 1.4s infinite both;
-        }
+        /* Typing */
+        .typing-indicator { display: inline-flex; gap: 4px; padding: 4px 0; }
+        .typing-indicator span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); animation: pulse 1.4s infinite both; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes pulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
 
-        /* Error Banner */
-        .error-banner {
-            background: rgba(255, 80, 80, 0.12);
-            border: 1px solid rgba(255, 80, 80, 0.25);
-            border-radius: 10px;
-            padding: 0.8em 1.2em;
-            margin-bottom: 1em;
-            font-size: 0.88em;
-        }
-
+        .error-banner { background: rgba(255, 80, 80, 0.12); border: 1px solid rgba(255, 80, 80, 0.25); border-radius: 10px; padding: 0.8em 1.2em; margin-bottom: 1em; font-size: 0.88em; }
         .hidden { display: none !important; }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .composer-hero h1 { font-size: 1.8em; }
-            .suggestions button { font-size: 0.78em; padding: 0.5em 0.9em; }
+            .suggestions button { font-size: 0.78em !important; padding: 0.5em 0.9em !important; }
             .input-row { flex-direction: column; }
             .input-row button { width: 100%; }
             .chat-messages { padding: 1em; }
@@ -286,22 +137,15 @@
 </head>
 <body class="is-preload">
     <div id="wrapper">
-        <!-- Header -->
         <header id="header">
             <div class="inner">
                 <a href="../index.html" class="logo">
                     <span class="symbol"><img src="../images/rabbit.svg" alt="" /></span>
                     <span class="title">Zhaoyan Lin's Portfolio</span>
                 </a>
-                <nav>
-                    <ul>
-                        <li><a href="#menu">Menu</a></li>
-                    </ul>
-                </nav>
+                <nav><ul><li><a href="#menu">Menu</a></li></ul></nav>
             </div>
         </header>
-
-        <!-- Menu -->
         <nav id="menu">
             <h2>Menu</h2>
             <ul>
@@ -313,7 +157,6 @@
             </ul>
         </nav>
 
-        <!-- Main -->
         <div id="main">
             <div class="inner">
                 <div class="composer-hero">
@@ -332,9 +175,7 @@
                         <button onclick="suggest(this)">A playful waltz for a rainy afternoon</button>
                         <button onclick="suggest(this)">A dramatic theme like Beethoven</button>
                     </div>
-
                     <div class="chat-messages" id="chat-messages"></div>
-
                     <div class="input-row">
                         <input type="text" id="user-input" placeholder="Describe the music you want to hear..." onkeydown="if(event.key==='Enter')sendMessage()" />
                         <button id="send-btn" onclick="sendMessage()">Compose</button>
@@ -343,7 +184,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer id="footer">
             <div class="inner">
                 <section>
@@ -354,24 +194,21 @@
                         <li><a href="mailto:linzhaoyan@hotmail.com" class="icon style2 fa-envelope-o"><span class="label">Email</span></a></li>
                     </ul>
                 </section>
-                <ul class="copyright">
-                    <li>&copy; Zhaoyan Lin 2026</li>
-                </ul>
+                <ul class="copyright"><li>&copy; Zhaoyan Lin 2026</li></ul>
             </div>
         </footer>
     </div>
 
-    <!-- Scripts -->
     <script src="../assets/js/jquery.min.js"></script>
     <script src="../assets/js/browser.min.js"></script>
     <script src="../assets/js/breakpoints.min.js"></script>
     <script src="../assets/js/util.js"></script>
     <script src="../assets/js/main.js"></script>
     <script>
-        const API_URL = 'https://composer-api-two.vercel.app/api/compose';
-        let conversationHistory = [];
-        let abcStore = {};
-        let currentSynth = null;
+        var API_URL = 'https://composer-api-two.vercel.app/api/compose';
+        var conversationHistory = [];
+        var abcStore = {};
+        var synthControllers = {};
 
         function suggest(btn) {
             document.getElementById('user-input').value = btn.textContent;
@@ -379,38 +216,37 @@
         }
 
         async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const text = input.value.trim();
+            var input = document.getElementById('user-input');
+            var text = input.value.trim();
             if (!text) return;
 
             input.value = '';
             appendMessage('user', text);
             conversationHistory.push({ role: 'user', content: text });
 
-            const sendBtn = document.getElementById('send-btn');
+            var sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
-            const typingId = showTyping();
+            var typingId = showTyping();
 
             try {
-                const res = await fetch(API_URL, {
+                var res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ messages: conversationHistory })
                 });
 
                 if (!res.ok) {
-                    const err = await res.text();
-                    throw new Error(err || 'HTTP ' + res.status);
+                    var errText = await res.text();
+                    throw new Error(errText || 'HTTP ' + res.status);
                 }
 
-                const data = await res.json();
+                var data = await res.json();
                 removeTyping(typingId);
 
-                const fullReply = data.abc
+                var fullReply = data.abc
                     ? data.reply + '\n```abc\n' + data.abc + '\n```'
                     : data.reply;
                 conversationHistory.push({ role: 'assistant', content: fullReply });
-
                 renderAssistantMessage(data.reply, data.abc);
 
             } catch (err) {
@@ -423,8 +259,8 @@
         }
 
         function appendMessage(role, text) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
+            var container = document.getElementById('chat-messages');
+            var div = document.createElement('div');
             div.className = 'chat-msg ' + role;
             div.innerHTML =
                 '<div class="label">' + (role === 'user' ? 'You' : 'Composer') + '</div>' +
@@ -434,23 +270,21 @@
         }
 
         function renderAssistantMessage(text, abc) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
+            var container = document.getElementById('chat-messages');
+            var div = document.createElement('div');
             div.className = 'chat-msg assistant';
 
-            const scoreId = 'score-' + Date.now();
-            let html = '<div class="label">Composer</div><div class="bubble">' +
+            var scoreId = 'score-' + Date.now();
+            var audioId = 'audio-' + scoreId;
+            var html = '<div class="label">Composer</div><div class="bubble">' +
                 escapeHtml(text).replace(/\n/g, '<br>');
 
             if (abc) {
                 abcStore[scoreId] = abc;
-                var audioId = 'audio-' + scoreId;
                 html +=
                     '<div class="score-container" id="' + scoreId + '"></div>' +
-                    '<div class="playback-controls" id="' + audioId + '"></div>' +
-                    '<div class="playback-controls">' +
-                    '<button onclick="downloadScore(\'' + scoreId + '\')">Download SVG</button>' +
-                    '</div>';
+                    '<div class="audio-container" id="' + audioId + '"></div>' +
+                    '<div class="dl-row"><button onclick="downloadScore(\'' + scoreId + '\')">Download SVG</button></div>';
             }
             html += '</div>';
             div.innerHTML = html;
@@ -458,45 +292,51 @@
             container.scrollTop = container.scrollHeight;
 
             if (abc) {
-                var visualObj = ABCJS.renderAbc(scoreId, abc, {
-                    responsive: 'resize',
-                    staffwidth: 700,
-                    paddingtop: 10,
-                    paddingbottom: 10
-                });
-                // Set up audio player
-                var audioId = 'audio-' + scoreId;
-                if (ABCJS.synth && ABCJS.synth.supportsAudio()) {
-                    var synthControl = new ABCJS.synth.SynthController();
-                    synthControl.load('#' + audioId, null, {
-                        displayRestart: true,
-                        displayPlay: true,
-                        displayProgress: true
+                try {
+                    var visualObj = ABCJS.renderAbc(scoreId, abc, {
+                        responsive: 'resize',
+                        staffwidth: 700,
+                        paddingtop: 10,
+                        paddingbottom: 10
                     });
-                    synthControl.setTune(visualObj[0], false);
+
+                    if (ABCJS.synth && ABCJS.synth.supportsAudio()) {
+                        var synthControl = new ABCJS.synth.SynthController();
+                        synthControl.load('#' + audioId, null, {
+                            displayRestart: true,
+                            displayPlay: true,
+                            displayProgress: true,
+                            displayWarp: false
+                        });
+                        synthControl.setTune(visualObj[0], false);
+                        synthControllers[scoreId] = synthControl;
+                    } else {
+                        document.getElementById(audioId).innerHTML =
+                            '<p style="color:#999;font-size:12px;">Audio not supported in this browser.</p>';
+                    }
+                } catch (err) {
+                    console.error('Render error:', err);
                 }
             }
         }
 
-        // Playback handled by ABCJS SynthController
-
         function downloadScore(scoreId) {
-            const el = document.getElementById(scoreId);
+            var el = document.getElementById(scoreId);
             if (!el) return;
-            const svg = el.querySelector('svg');
+            var svg = el.querySelector('svg');
             if (!svg) return;
-            const data = new XMLSerializer().serializeToString(svg);
-            const blob = new Blob([data], { type: 'image/svg+xml' });
-            const a = document.createElement('a');
+            var data = new XMLSerializer().serializeToString(svg);
+            var blob = new Blob([data], { type: 'image/svg+xml' });
+            var a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'composition.svg';
             a.click();
         }
 
         function showTyping() {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            const id = 'typing-' + Date.now();
+            var container = document.getElementById('chat-messages');
+            var div = document.createElement('div');
+            var id = 'typing-' + Date.now();
             div.id = id;
             div.className = 'chat-msg assistant';
             div.innerHTML =
@@ -508,13 +348,13 @@
         }
 
         function removeTyping(id) {
-            const el = document.getElementById(id);
+            var el = document.getElementById(id);
             if (el) el.remove();
         }
 
         function appendError(text) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
+            var container = document.getElementById('chat-messages');
+            var div = document.createElement('div');
             div.className = 'error-banner';
             div.textContent = text;
             container.appendChild(div);
@@ -522,7 +362,7 @@
         }
 
         function escapeHtml(text) {
-            const div = document.createElement('div');
+            var div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
