@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Music Composer — Zhaoyan Lin</title>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-basic-min.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-midi.min.js" onerror=""></script>
+    <style>
+        #composer-app {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .chat-messages {
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 1.5em;
+            margin-bottom: 1.5em;
+            background: rgba(0,0,0,0.15);
+        }
+        .chat-msg {
+            margin-bottom: 1.2em;
+            line-height: 1.6;
+        }
+        .chat-msg.user {
+            text-align: right;
+        }
+        .chat-msg.user .bubble {
+            display: inline-block;
+            background: rgba(108, 99, 255, 0.25);
+            border: 1px solid rgba(108, 99, 255, 0.4);
+            padding: 0.6em 1em;
+            border-radius: 12px 12px 2px 12px;
+            max-width: 80%;
+            text-align: left;
+        }
+        .chat-msg.assistant .bubble {
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.6em 1em;
+            border-radius: 12px 12px 12px 2px;
+            max-width: 90%;
+            text-align: left;
+        }
+        .chat-msg .label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+            margin-bottom: 0.3em;
+        }
+        .input-row {
+            display: flex;
+            gap: 0.75em;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 0.8em 1em;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.2);
+            color: inherit;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: rgba(108, 99, 255, 0.6);
+        }
+        .input-row button {
+            padding: 0.8em 1.8em;
+            border-radius: 8px;
+            border: none;
+            background: #6c63ff;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .input-row button:hover {
+            background: #5a52d5;
+        }
+        .input-row button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .score-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1em;
+            margin: 1em 0;
+            min-height: 80px;
+        }
+        .score-container svg {
+            width: 100% !important;
+        }
+        .playback-controls {
+            display: flex;
+            gap: 0.5em;
+            margin: 0.5em 0;
+        }
+        .playback-controls button {
+            padding: 0.5em 1.2em;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.08);
+            color: inherit;
+            font-family: inherit;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        .playback-controls button:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+            margin-bottom: 1.5em;
+        }
+        .suggestions button {
+            padding: 0.5em 1em;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: inherit;
+            font-family: inherit;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        .suggestions button:hover {
+            background: rgba(108, 99, 255, 0.2);
+            border-color: rgba(108, 99, 255, 0.4);
+        }
+        .typing-indicator {
+            display: inline-block;
+        }
+        .typing-indicator span {
+            animation: blink 1.4s infinite both;
+            opacity: 0.3;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+        .error-banner {
+            background: rgba(255, 80, 80, 0.15);
+            border: 1px solid rgba(255, 80, 80, 0.3);
+            border-radius: 8px;
+            padding: 0.8em 1em;
+            margin-bottom: 1em;
+            font-size: 0.9em;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <!-- Header -->
+        <header id="header">
+            <div class="inner">
+                <a href="../index.html" class="logo">
+                    <span class="symbol"><img src="../images/rabbit.svg" alt="" /></span>
+                    <span class="title">Zhaoyan Lin's Portfolio</span>
+                </a>
+                <nav>
+                    <ul>
+                        <li><a href="#menu">Menu</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Menu -->
+        <nav id="menu">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../project.html">Project</a></li>
+                <li><a href="../art.html">Art</a></li>
+                <li><a href="../other.html">Other</a></li>
+                <li><a href="../profile.html">Profile</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+            <div class="inner">
+                <h1>AI Music Composer</h1>
+                <p>Describe a mood, style, or composer influence — and AI will compose original music for you, rendered as sheet music you can play back in your browser.</p>
+                <p><small>Built with Claude API, Vercel serverless functions, and abcjs. <a href="https://github.com/youtuyy/composer-api">View source</a></small></p>
+
+                <div id="composer-app">
+                    <div id="chat-area">
+                        <div class="suggestions">
+                            <button onclick="suggest(this)">A melancholic nocturne in the style of Chopin</button>
+                            <button onclick="suggest(this)">An energetic baroque fugue like Bach</button>
+                            <button onclick="suggest(this)">A playful waltz for a rainy afternoon</button>
+                            <button onclick="suggest(this)">A dramatic theme like Beethoven</button>
+                        </div>
+
+                        <div class="chat-messages" id="chat-messages"></div>
+
+                        <div class="input-row">
+                            <input type="text" id="user-input" placeholder="Describe the music you want to hear..." onkeydown="if(event.key==='Enter')sendMessage()" />
+                            <button id="send-btn" onclick="sendMessage()">Compose</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer id="footer">
+            <div class="inner">
+                <section>
+                    <h2>Follow</h2>
+                    <ul class="icons">
+                        <li><a href="https://www.instagram.com/youtuyy/" class="icon style2 fa-instagram"><span class="label">Instagram</span></a></li>
+                        <li><a href="https://github.com/youtuyy" class="icon style2 fa-github"><span class="label">GitHub</span></a></li>
+                        <li><a href="mailto:linzhaoyan@hotmail.com" class="icon style2 fa-envelope-o"><span class="label">Email</span></a></li>
+                    </ul>
+                </section>
+                <ul class="copyright">
+                    <li>&copy; Zhaoyan Lin 2026</li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/browser.min.js"></script>
+    <script src="../assets/js/breakpoints.min.js"></script>
+    <script src="../assets/js/util.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+        const API_URL = 'https://composer-api-two.vercel.app/api/compose';
+        let conversationHistory = [];
+        let abcStore = {};
+        let currentSynth = null;
+
+        function suggest(btn) {
+            document.getElementById('user-input').value = btn.textContent;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            appendMessage('user', text);
+            conversationHistory.push({ role: 'user', content: text });
+
+            const sendBtn = document.getElementById('send-btn');
+            sendBtn.disabled = true;
+            const typingId = showTyping();
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: conversationHistory })
+                });
+
+                if (!res.ok) {
+                    const err = await res.text();
+                    throw new Error(err || 'HTTP ' + res.status);
+                }
+
+                const data = await res.json();
+                removeTyping(typingId);
+
+                // Store full reply for conversation context
+                const fullReply = data.abc
+                    ? data.reply + '\n```abc\n' + data.abc + '\n```'
+                    : data.reply;
+                conversationHistory.push({ role: 'assistant', content: fullReply });
+
+                renderAssistantMessage(data.reply, data.abc);
+
+            } catch (err) {
+                removeTyping(typingId);
+                appendError('Failed to connect: ' + err.message);
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function appendMessage(role, text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-msg ' + role;
+            div.innerHTML =
+                '<div class="label">' + (role === 'user' ? 'You' : 'Composer') + '</div>' +
+                '<div class="bubble">' + escapeHtml(text) + '</div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderAssistantMessage(text, abc) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-msg assistant';
+
+            const scoreId = 'score-' + Date.now();
+            let html = '<div class="label">Composer</div><div class="bubble">' +
+                escapeHtml(text).replace(/\n/g, '<br>');
+
+            if (abc) {
+                abcStore[scoreId] = abc;
+                html +=
+                    '<div class="score-container" id="' + scoreId + '"></div>' +
+                    '<div class="playback-controls">' +
+                    '<button onclick="playScore(\'' + scoreId + '\', this)">Play</button>' +
+                    '<button onclick="stopScore()">Stop</button>' +
+                    '<button onclick="downloadScore(\'' + scoreId + '\')">Download SVG</button>' +
+                    '</div>';
+            }
+            html += '</div>';
+            div.innerHTML = html;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+
+            if (abc) {
+                ABCJS.renderAbc(scoreId, abc, {
+                    responsive: 'resize',
+                    staffwidth: 700,
+                    paddingtop: 10,
+                    paddingbottom: 10
+                });
+            }
+        }
+
+        async function playScore(scoreId, btn) {
+            stopScore();
+            const abc = abcStore[scoreId];
+            if (!abc) return;
+
+            if (ABCJS.synth && ABCJS.synth.supportsAudio()) {
+                try {
+                    const visualObj = ABCJS.renderAbc(scoreId, abc, {
+                        responsive: 'resize',
+                        staffwidth: 700
+                    });
+
+                    currentSynth = new ABCJS.synth.CreateSynth();
+                    await currentSynth.init({ visualObj: visualObj[0] });
+                    await currentSynth.prime();
+                    currentSynth.start();
+                    btn.textContent = 'Playing...';
+
+                    // Poll for completion
+                    const checkDone = setInterval(function() {
+                        if (!currentSynth || currentSynth.getIsRunning && !currentSynth.getIsRunning()) {
+                            btn.textContent = 'Play';
+                            clearInterval(checkDone);
+                        }
+                    }, 500);
+                } catch (err) {
+                    console.error('Playback error:', err);
+                    btn.textContent = 'Play';
+                }
+            } else {
+                appendError('Audio playback is not supported in this browser.');
+            }
+        }
+
+        function stopScore() {
+            if (currentSynth) {
+                try { currentSynth.stop(); } catch(e) {}
+                currentSynth = null;
+            }
+            document.querySelectorAll('.playback-controls button:first-child').forEach(function(b) {
+                b.textContent = 'Play';
+            });
+        }
+
+        function downloadScore(scoreId) {
+            const el = document.getElementById(scoreId);
+            if (!el) return;
+            const svg = el.querySelector('svg');
+            if (!svg) return;
+            const data = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([data], { type: 'image/svg+xml' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'composition.svg';
+            a.click();
+        }
+
+        function showTyping() {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            const id = 'typing-' + Date.now();
+            div.id = id;
+            div.className = 'chat-msg assistant';
+            div.innerHTML =
+                '<div class="label">Composer</div>' +
+                '<div class="bubble"><div class="typing-indicator"><span>.</span><span>.</span><span>.</span></div></div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function appendError(text) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'error-banner';
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
