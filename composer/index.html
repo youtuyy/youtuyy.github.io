@@ -7,160 +7,255 @@
     <link rel="stylesheet" href="../assets/css/main.css" />
     <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
     <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-basic-min.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-midi.min.js" onerror=""></script>
     <style>
-        #composer-app {
-            max-width: 800px;
+        /* Hero Section */
+        .composer-hero {
+            text-align: center;
+            padding: 2em 0 1em;
+        }
+        .composer-hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.2em;
+            background: linear-gradient(135deg, #c9a0dc, #6c63ff, #48d1cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .composer-hero .subtitle {
+            font-size: 1.1em;
+            opacity: 0.7;
+            max-width: 550px;
             margin: 0 auto;
-        }
-        .chat-messages {
-            min-height: 200px;
-            max-height: 500px;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 8px;
-            padding: 1.5em;
-            margin-bottom: 1.5em;
-            background: rgba(0,0,0,0.15);
-        }
-        .chat-msg {
-            margin-bottom: 1.2em;
             line-height: 1.6;
         }
-        .chat-msg.user {
-            text-align: right;
-        }
-        .chat-msg.user .bubble {
+        .composer-hero .tech-badge {
             display: inline-block;
-            background: rgba(108, 99, 255, 0.25);
-            border: 1px solid rgba(108, 99, 255, 0.4);
-            padding: 0.6em 1em;
-            border-radius: 12px 12px 2px 12px;
-            max-width: 80%;
-            text-align: left;
-        }
-        .chat-msg.assistant .bubble {
-            display: inline-block;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 0.6em 1em;
-            border-radius: 12px 12px 12px 2px;
-            max-width: 90%;
-            text-align: left;
-        }
-        .chat-msg .label {
+            margin: 1.2em 0.3em 0;
+            padding: 0.3em 0.8em;
+            border-radius: 20px;
             font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.5;
-            margin-bottom: 0.3em;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.04);
+            opacity: 0.6;
         }
-        .input-row {
-            display: flex;
-            gap: 0.75em;
+
+        /* App Container */
+        #composer-app {
+            max-width: 820px;
+            margin: 1.5em auto 0;
         }
-        .input-row input {
-            flex: 1;
-            padding: 0.8em 1em;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.2);
-            color: inherit;
-            font-family: inherit;
-            font-size: 1em;
-        }
-        .input-row input:focus {
-            outline: none;
-            border-color: rgba(108, 99, 255, 0.6);
-        }
-        .input-row button {
-            padding: 0.8em 1.8em;
-            border-radius: 8px;
-            border: none;
-            background: #6c63ff;
-            color: #fff;
-            font-family: inherit;
-            font-size: 1em;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .input-row button:hover {
-            background: #5a52d5;
-        }
-        .input-row button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .score-container {
-            background: #fff;
-            border-radius: 8px;
-            padding: 1em;
-            margin: 1em 0;
-            min-height: 80px;
-        }
-        .score-container svg {
-            width: 100% !important;
-        }
-        .playback-controls {
-            display: flex;
-            gap: 0.5em;
-            margin: 0.5em 0;
-        }
-        .playback-controls button {
-            padding: 0.5em 1.2em;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.08);
-            color: inherit;
-            font-family: inherit;
-            font-size: 0.9em;
-            cursor: pointer;
-        }
-        .playback-controls button:hover {
-            background: rgba(255,255,255,0.15);
-        }
+
+        /* Suggestion Chips */
         .suggestions {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5em;
-            margin-bottom: 1.5em;
+            gap: 0.6em;
+            justify-content: center;
+            margin-bottom: 2em;
         }
         .suggestions button {
-            padding: 0.5em 1em;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.05);
+            padding: 0.65em 1.2em;
+            border-radius: 24px;
+            border: 1px solid rgba(200, 160, 220, 0.3);
+            background: linear-gradient(135deg, rgba(200, 160, 220, 0.08), rgba(108, 99, 255, 0.08));
             color: inherit;
             font-family: inherit;
             font-size: 0.85em;
             cursor: pointer;
+            transition: all 0.25s ease;
         }
         .suggestions button:hover {
-            background: rgba(108, 99, 255, 0.2);
-            border-color: rgba(108, 99, 255, 0.4);
+            background: linear-gradient(135deg, rgba(200, 160, 220, 0.2), rgba(108, 99, 255, 0.2));
+            border-color: rgba(200, 160, 220, 0.5);
+            transform: translateY(-1px);
         }
-        .typing-indicator {
+
+        /* Chat Area */
+        .chat-messages {
+            min-height: 120px;
+            max-height: 520px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.8em;
+            margin-bottom: 1em;
+            background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.2));
+            backdrop-filter: blur(4px);
+        }
+        .chat-messages:empty::before {
+            content: "Your compositions will appear here...";
+            display: block;
+            text-align: center;
+            opacity: 0.3;
+            padding: 3em 0;
+            font-style: italic;
+        }
+        .chat-msg {
+            margin-bottom: 1.4em;
+            line-height: 1.65;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-msg.user {
+            text-align: right;
+        }
+        .chat-msg .label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.4;
+            margin-bottom: 0.4em;
+            font-weight: 700;
+        }
+        .chat-msg.user .bubble {
             display: inline-block;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(108, 99, 255, 0.1));
+            border: 1px solid rgba(108, 99, 255, 0.3);
+            padding: 0.7em 1.2em;
+            border-radius: 16px 16px 4px 16px;
+            max-width: 75%;
+            text-align: left;
+        }
+        .chat-msg.assistant .bubble {
+            display: inline-block;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.7em 1.2em;
+            border-radius: 16px 16px 16px 4px;
+            max-width: 92%;
+            text-align: left;
+        }
+
+        /* Score Display */
+        .score-container {
+            background: #fefefe;
+            border-radius: 12px;
+            padding: 1.2em 1em;
+            margin: 1.2em 0 0.8em;
+            min-height: 80px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+        }
+        .score-container svg {
+            width: 100% !important;
+        }
+
+        /* Playback Controls */
+        .playback-controls {
+            display: flex;
+            gap: 0.5em;
+            margin: 0.6em 0 0;
+        }
+        .playback-controls button {
+            padding: 0.5em 1.1em;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: inherit;
+            font-family: inherit;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .playback-controls button:hover {
+            background: rgba(108, 99, 255, 0.15);
+            border-color: rgba(108, 99, 255, 0.3);
+        }
+        .playback-controls button.playing {
+            background: rgba(108, 99, 255, 0.25);
+            border-color: rgba(108, 99, 255, 0.5);
+        }
+
+        /* Input Area */
+        .input-row {
+            display: flex;
+            gap: 0.6em;
+            background: rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 0.4em;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 0.85em 1.1em;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+            font-size: 1em;
+            outline: none;
+        }
+        .input-row input::placeholder {
+            opacity: 0.35;
+        }
+        .input-row button {
+            padding: 0.85em 2em;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #6c63ff, #9b59b6);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.02em;
+        }
+        .input-row button:hover {
+            background: linear-gradient(135deg, #5a52d5, #8e44ad);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+        }
+        .input-row button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px 0;
         }
         .typing-indicator span {
-            animation: blink 1.4s infinite both;
-            opacity: 0.3;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            animation: pulse 1.4s infinite both;
         }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink {
-            0%, 80%, 100% { opacity: 0.3; }
-            40% { opacity: 1; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes pulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
         }
+
+        /* Error Banner */
         .error-banner {
-            background: rgba(255, 80, 80, 0.15);
-            border: 1px solid rgba(255, 80, 80, 0.3);
-            border-radius: 8px;
-            padding: 0.8em 1em;
+            background: rgba(255, 80, 80, 0.12);
+            border: 1px solid rgba(255, 80, 80, 0.25);
+            border-radius: 10px;
+            padding: 0.8em 1.2em;
             margin-bottom: 1em;
-            font-size: 0.9em;
+            font-size: 0.88em;
         }
+
         .hidden { display: none !important; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .composer-hero h1 { font-size: 1.8em; }
+            .suggestions button { font-size: 0.78em; padding: 0.5em 0.9em; }
+            .input-row { flex-direction: column; }
+            .input-row button { width: 100%; }
+            .chat-messages { padding: 1em; }
+        }
     </style>
 </head>
 <body class="is-preload">
@@ -195,25 +290,28 @@
         <!-- Main -->
         <div id="main">
             <div class="inner">
-                <h1>AI Music Composer</h1>
-                <p>Describe a mood, style, or composer influence — and AI will compose original music for you, rendered as sheet music you can play back in your browser.</p>
-                <p><small>Built with Claude API, Vercel serverless functions, and abcjs. <a href="https://github.com/youtuyy/composer-api">View source</a></small></p>
+                <div class="composer-hero">
+                    <h1>AI Music Composer</h1>
+                    <p class="subtitle">Describe a mood, style, or composer influence — and AI will compose original music, rendered as sheet music you can play in your browser.</p>
+                    <span class="tech-badge">Claude API</span>
+                    <span class="tech-badge">Vercel Serverless</span>
+                    <span class="tech-badge">abcjs</span>
+                    <span class="tech-badge">Web Audio</span>
+                </div>
 
                 <div id="composer-app">
-                    <div id="chat-area">
-                        <div class="suggestions">
-                            <button onclick="suggest(this)">A melancholic nocturne in the style of Chopin</button>
-                            <button onclick="suggest(this)">An energetic baroque fugue like Bach</button>
-                            <button onclick="suggest(this)">A playful waltz for a rainy afternoon</button>
-                            <button onclick="suggest(this)">A dramatic theme like Beethoven</button>
-                        </div>
+                    <div class="suggestions">
+                        <button onclick="suggest(this)">A melancholic nocturne in the style of Chopin</button>
+                        <button onclick="suggest(this)">An energetic baroque fugue like Bach</button>
+                        <button onclick="suggest(this)">A playful waltz for a rainy afternoon</button>
+                        <button onclick="suggest(this)">A dramatic theme like Beethoven</button>
+                    </div>
 
-                        <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-messages" id="chat-messages"></div>
 
-                        <div class="input-row">
-                            <input type="text" id="user-input" placeholder="Describe the music you want to hear..." onkeydown="if(event.key==='Enter')sendMessage()" />
-                            <button id="send-btn" onclick="sendMessage()">Compose</button>
-                        </div>
+                    <div class="input-row">
+                        <input type="text" id="user-input" placeholder="Describe the music you want to hear..." onkeydown="if(event.key==='Enter')sendMessage()" />
+                        <button id="send-btn" onclick="sendMessage()">Compose</button>
                     </div>
                 </div>
             </div>
@@ -282,7 +380,6 @@
                 const data = await res.json();
                 removeTyping(typingId);
 
-                // Store full reply for conversation context
                 const fullReply = data.abc
                     ? data.reply + '\n```abc\n' + data.abc + '\n```'
                     : data.reply;
@@ -324,9 +421,9 @@
                 html +=
                     '<div class="score-container" id="' + scoreId + '"></div>' +
                     '<div class="playback-controls">' +
-                    '<button onclick="playScore(\'' + scoreId + '\', this)">Play</button>' +
-                    '<button onclick="stopScore()">Stop</button>' +
-                    '<button onclick="downloadScore(\'' + scoreId + '\')">Download SVG</button>' +
+                    '<button onclick="playScore(\'' + scoreId + '\', this)">&#9654; Play</button>' +
+                    '<button onclick="stopScore()">&#9632; Stop</button>' +
+                    '<button onclick="downloadScore(\'' + scoreId + '\')">&#8615; Download SVG</button>' +
                     '</div>';
             }
             html += '</div>';
@@ -360,18 +457,20 @@
                     await currentSynth.init({ visualObj: visualObj[0] });
                     await currentSynth.prime();
                     currentSynth.start();
-                    btn.textContent = 'Playing...';
+                    btn.innerHTML = '&#9654; Playing...';
+                    btn.classList.add('playing');
 
-                    // Poll for completion
                     const checkDone = setInterval(function() {
-                        if (!currentSynth || currentSynth.getIsRunning && !currentSynth.getIsRunning()) {
-                            btn.textContent = 'Play';
+                        if (!currentSynth || (currentSynth.getIsRunning && !currentSynth.getIsRunning())) {
+                            btn.innerHTML = '&#9654; Play';
+                            btn.classList.remove('playing');
                             clearInterval(checkDone);
                         }
                     }, 500);
                 } catch (err) {
                     console.error('Playback error:', err);
-                    btn.textContent = 'Play';
+                    btn.innerHTML = '&#9654; Play';
+                    btn.classList.remove('playing');
                 }
             } else {
                 appendError('Audio playback is not supported in this browser.');
@@ -384,7 +483,8 @@
                 currentSynth = null;
             }
             document.querySelectorAll('.playback-controls button:first-child').forEach(function(b) {
-                b.textContent = 'Play';
+                b.innerHTML = '&#9654; Play';
+                b.classList.remove('playing');
             });
         }
 
@@ -409,7 +509,7 @@
             div.className = 'chat-msg assistant';
             div.innerHTML =
                 '<div class="label">Composer</div>' +
-                '<div class="bubble"><div class="typing-indicator"><span>.</span><span>.</span><span>.</span></div></div>';
+                '<div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
             return id;
