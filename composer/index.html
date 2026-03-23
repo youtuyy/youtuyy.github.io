@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../assets/css/main.css" />
     <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
     <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.4/dist/abcjs-basic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* abcjs audio controls (inlined) */
         .abcjs-inline-audio{height:26px;padding:0 5px;border-radius:3px;background-color:#424242;display:flex;align-items:center;box-sizing:border-box}
@@ -31,34 +32,34 @@
         @keyframes abcjs-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         .abcjs-css-warning{display:none}
         /* Hero */
-        .composer-hero { text-align: center; padding: 2em 0 1em; }
+        .composer-hero { text-align: center; padding: 1.6em 1em 0.8em; }
         .composer-hero h1 {
-            font-size: 2.5em; margin-bottom: 0.2em;
-            background: linear-gradient(135deg, #c9a0dc, #6c63ff, #48d1cc);
+            font-size: 2em; margin-bottom: 0.25em;
+            background: linear-gradient(135deg, #f2849e, #e8637a, #d4a0b0);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .composer-hero .subtitle { font-size: 1.1em; opacity: 0.7; max-width: 550px; margin: 0 auto; line-height: 1.6; }
+        .composer-hero .subtitle { font-size: 0.92em; opacity: 0.6; max-width: 480px; margin: 0 auto; line-height: 1.6; }
         .composer-hero .tech-badge {
-            display: inline-block; margin: 1.2em 0.3em 0; padding: 0.3em 0.8em;
-            border-radius: 20px; font-size: 0.75em;
-            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); opacity: 0.6;
+            display: inline-block; margin: 1em 0.25em 0; padding: 0.25em 0.7em;
+            border-radius: 20px; font-size: 0.68em;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); opacity: 0.45;
         }
-        #composer-app { max-width: 820px; margin: 1.5em auto 0; }
+        #composer-app { max-width: 780px; margin: 2em auto 0; padding: 0 0.8em; }
 
         /* Suggestion cards */
         .suggestions {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.7em;
-            margin-bottom: 2em; max-width: 650px; margin-left: auto; margin-right: auto;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.6em;
+            margin-bottom: 1.8em; max-width: 620px; margin-left: auto; margin-right: auto;
         }
         .suggestion-card {
-            padding: 0.9em 1.1em; border-radius: 12px; cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.04);
+            padding: 0.8em 1em; border-radius: 10px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
             transition: all 0.2s ease; line-height: 1.5;
         }
         .suggestion-card:hover {
-            background: rgba(108, 99, 255, 0.1);
-            border-color: rgba(108, 99, 255, 0.3);
+            background: rgba(242, 132, 158, 0.08);
+            border-color: rgba(242, 132, 158, 0.25);
             transform: translateY(-2px);
         }
         .suggestion-card .card-icon { font-size: 1.2em; margin-bottom: 0.3em; display: block; }
@@ -67,22 +68,22 @@
 
         /* Chat */
         .chat-messages {
-            min-height: 120px; max-height: 520px; overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
-            padding: 1.8em; margin-bottom: 1em;
-            background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.2));
+            min-height: 100px; max-height: 520px; overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+            padding: 1.5em; margin-bottom: 0.8em;
+            background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.15));
         }
         .chat-messages:empty::before {
             content: "Your compositions will appear here...";
-            display: block; text-align: center; opacity: 0.3; padding: 3em 0; font-style: italic;
+            display: block; text-align: center; opacity: 0.25; padding: 2.5em 0; font-style: italic;
         }
-        .chat-msg { margin-bottom: 1.4em; line-height: 1.65; animation: fadeIn 0.3s ease; }
+        .chat-msg { margin-bottom: 1.2em; line-height: 1.65; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .chat-msg.user { text-align: right; }
         .chat-msg .label { font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.4; margin-bottom: 0.4em; font-weight: 700; }
         .chat-msg.user .bubble {
-            display: inline-block; background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(108, 99, 255, 0.1));
-            border: 1px solid rgba(108, 99, 255, 0.3); padding: 0.7em 1.2em;
+            display: inline-block; background: linear-gradient(135deg, rgba(242, 132, 158, 0.15), rgba(242, 132, 158, 0.08));
+            border: 1px solid rgba(242, 132, 158, 0.25); padding: 0.7em 1.2em;
             border-radius: 16px 16px 4px 16px; max-width: 75%; text-align: left;
         }
         .chat-msg.assistant .bubble {
@@ -122,8 +123,8 @@
         /* Input */
         .input-row {
             display: flex; align-items: center; gap: 0;
-            background: rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 28px; padding: 0.3em 0.3em 0.3em 1.2em;
+            background: rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; padding: 0.25em 0.3em 0.25em 1.2em;
         }
         .input-row input {
             flex: 1; padding: 0.7em 0.5em; border-radius: 0; border: none;
@@ -133,12 +134,12 @@
         .compose-btn {
             display: flex; align-items: center; justify-content: center;
             width: 44px; height: 44px; min-width: 44px; border-radius: 50%;
-            background: linear-gradient(135deg, #6c63ff, #9b59b6);
+            background: linear-gradient(135deg, #f2849e, #e8637a);
             cursor: pointer; transition: all 0.2s ease;
         }
         .compose-btn:hover {
             transform: scale(1.08);
-            box-shadow: 0 4px 16px rgba(108, 99, 255, 0.4);
+            box-shadow: 0 4px 16px rgba(242, 132, 158, 0.35);
         }
         .compose-btn.disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
         .compose-btn svg { width: 20px; height: 20px; fill: #fff; }
@@ -152,6 +153,50 @@
 
         .error-banner { background: rgba(255, 80, 80, 0.12); border: 1px solid rgba(255, 80, 80, 0.25); border-radius: 10px; padding: 0.8em 1.2em; margin-bottom: 1em; font-size: 0.88em; }
         .hidden { display: none !important; }
+
+        /* Sentence builder */
+        .sentence-builder {
+            margin-bottom: 0.7em; text-align: center; font-size: 0.88em; line-height: 2;
+            opacity: 0.55;
+        }
+        .sentence-builder:hover { opacity: 0.85; }
+        .sentence-builder .sentence-text { }
+        .slot {
+            display: inline-block; position: relative; cursor: pointer;
+            border-bottom: 1.5px dashed rgba(242, 132, 158, 0.5);
+            padding-bottom: 1px; transition: all 0.2s ease; user-select: none;
+            color: #f2849e;
+        }
+        .slot:hover { border-bottom-color: #f2849e; color: #f7a0b4; }
+        .slot .arrow { font-size: 0.6em; margin-left: 0.2em; }
+        .slot-dropdown {
+            display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+            background: #1e1e2e; border: 1px solid rgba(242, 132, 158, 0.15); border-radius: 8px;
+            padding: 0.3em 0; z-index: 100; min-width: 120px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .slot-dropdown.open { display: block; }
+        .slot-option {
+            padding: 0.35em 0.9em; cursor: pointer; white-space: nowrap;
+            font-size: 0.85em; transition: background 0.12s;
+        }
+        .slot-option:hover { background: rgba(242, 132, 158, 0.1); }
+        .slot-option.active { color: #f2849e; }
+        .randomize-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.25s ease; vertical-align: middle;
+            margin-left: 0.4em; opacity: 0.4;
+        }
+        .randomize-btn:hover { opacity: 0.8; transform: rotate(45deg); }
+        .randomize-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        /* Markdown in assistant bubbles */
+        .chat-msg.assistant .bubble p { margin: 0.3em 0; }
+        .chat-msg.assistant .bubble ul, .chat-msg.assistant .bubble ol { margin: 0.3em 0 0.3em 1.2em; padding: 0; }
+        .chat-msg.assistant .bubble li { margin: 0.15em 0; }
+        .chat-msg.assistant .bubble strong { font-weight: 700; }
+        .chat-msg.assistant .bubble em { font-style: italic; }
+        .chat-msg.assistant .bubble code { background: rgba(255,255,255,0.08); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.9em; }
 
         @media (max-width: 600px) {
             .composer-hero h1 { font-size: 1.8em; }
@@ -215,6 +260,25 @@
                         </div>
                     </div>
                     <div class="chat-messages" id="chat-messages"></div>
+                    <div class="sentence-builder">
+                        <span class="sentence-text">Compose a </span>
+                        <span class="slot" id="slot-mood" onclick="openSlot('mood')">
+                            melancholic<span class="arrow">&#9662;</span>
+                            <div class="slot-dropdown" id="dd-mood"></div>
+                        </span>
+                        <span class="sentence-text"> </span>
+                        <span class="slot" id="slot-form" onclick="openSlot('form')">
+                            nocturne<span class="arrow">&#9662;</span>
+                            <div class="slot-dropdown" id="dd-form"></div>
+                        </span>
+                        <span class="sentence-text"> in the style of </span>
+                        <span class="slot" id="slot-style" onclick="openSlot('style')">
+                            Chopin<span class="arrow">&#9662;</span>
+                            <div class="slot-dropdown" id="dd-style"></div>
+                        </span>
+                        <span class="randomize-btn" onclick="randomizeSlots()" title="Surprise me!">
+                            <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4C7.58 4 4.01 7.58 4.01 12S7.58 20 12 20c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                        </span>
                     <div class="input-row">
                         <input type="text" id="user-input" placeholder="Describe the music you want to hear..." onkeydown="if(event.key==='Enter')sendMessage()" />
                         <div class="compose-btn" id="send-btn" onclick="sendMessage()" title="Compose">
@@ -246,6 +310,9 @@
     <script src="../assets/js/util.js"></script>
     <script src="../assets/js/main.js"></script>
     <script>
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({ breaks: true, gfm: true });
+        }
         var API_URL = 'https://composer-api-two.vercel.app/api/compose';
         var conversationHistory = [];
         var abcStore = {};
@@ -319,8 +386,10 @@
 
             var scoreId = 'score-' + Date.now();
             var audioId = 'audio-' + scoreId;
-            var html = '<div class="label">Composer</div><div class="bubble">' +
-                escapeHtml(text).replace(/\n/g, '<br>');
+            var renderedText = (typeof marked !== 'undefined' && marked.parse)
+                ? marked.parse(text)
+                : escapeHtml(text).replace(/\n/g, '<br>');
+            var html = '<div class="label">Composer</div><div class="bubble">' + renderedText;
 
             if (abc) {
                 abcStore[scoreId] = abc;
@@ -409,6 +478,74 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        /* Sentence builder logic */
+        var slotOptions = {
+            mood: ['melancholic', 'joyful', 'dramatic', 'peaceful', 'mysterious', 'heroic', 'tender', 'triumphant'],
+            form: ['nocturne', 'waltz', 'fugue', 'sonata', 'minuet', 'march', 'prelude', 'etude'],
+            style: ['Chopin', 'Bach', 'Mozart', 'Beethoven', 'Debussy', 'Tchaikovsky', 'Liszt', 'Schubert']
+        };
+        var slotValues = { mood: 'melancholic', form: 'nocturne', style: 'Chopin' };
+
+        function initDropdowns() {
+            Object.keys(slotOptions).forEach(function(group) {
+                var dd = document.getElementById('dd-' + group);
+                dd.innerHTML = '';
+                slotOptions[group].forEach(function(opt) {
+                    var div = document.createElement('div');
+                    div.className = 'slot-option' + (opt === slotValues[group] ? ' active' : '');
+                    div.textContent = opt;
+                    div.onclick = function(e) {
+                        e.stopPropagation();
+                        selectSlot(group, opt);
+                    };
+                    dd.appendChild(div);
+                });
+            });
+        }
+
+        function openSlot(group) {
+            var dd = document.getElementById('dd-' + group);
+            var isOpen = dd.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) dd.classList.add('open');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.slot-dropdown').forEach(function(d) { d.classList.remove('open'); });
+        }
+
+        function selectSlot(group, value) {
+            slotValues[group] = value;
+            var slot = document.getElementById('slot-' + group);
+            slot.childNodes[0].textContent = value;
+            closeAllDropdowns();
+            initDropdowns();
+            buildSentencePrompt();
+        }
+
+        function buildSentencePrompt() {
+            var prompt = 'A ' + slotValues.mood + ' ' + slotValues.form + ' in the style of ' + slotValues.style;
+            document.getElementById('user-input').value = prompt;
+            document.getElementById('user-input').focus();
+        }
+
+        function randomizeSlots() {
+            Object.keys(slotOptions).forEach(function(group) {
+                var opts = slotOptions[group];
+                var pick = opts[Math.floor(Math.random() * opts.length)];
+                slotValues[group] = pick;
+                document.getElementById('slot-' + group).childNodes[0].textContent = pick;
+            });
+            initDropdowns();
+            buildSentencePrompt();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.slot')) closeAllDropdowns();
+        });
+
+        initDropdowns();
     </script>
 </body>
 </html>
