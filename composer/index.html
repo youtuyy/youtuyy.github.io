@@ -233,7 +233,7 @@
             <div class="inner">
                 <div class="composer-hero">
                     <h1>AI Music Composer</h1>
-                    <p class="subtitle">Describe a mood, style, or composer influence — and AI will compose original music, rendered as sheet music you can play in your browser.</p>
+                    <p class="subtitle">I grew up on Rachmaninoff and Tchaikovsky — so I built an AI that composes classical music. Describe a mood or style, and hear it as sheet music in your browser.</p>
                     <span class="tech-badge">Claude API</span>
                     <span class="tech-badge">Vercel Serverless</span>
                     <span class="tech-badge">abcjs</span>
@@ -242,38 +242,38 @@
 
                 <div id="composer-app">
                     <div class="suggestions">
-                        <div class="suggestion-card" onclick="suggest('A melancholic nocturne in the style of Chopin')">
-                            <span class="card-icon">🌙</span>
-                            <span class="card-text">A melancholic nocturne in the style of Chopin</span>
+                        <div class="suggestion-card" onclick="suggest('A sweeping romantic theme like Rachmaninoff\'s Piano Concerto No. 2')">
+                            <span class="card-icon">🎹</span>
+                            <span class="card-text">Sweeping and romantic, like Rach's 2nd Piano Concerto</span>
                         </div>
-                        <div class="suggestion-card" onclick="suggest('An energetic baroque fugue like Bach')">
-                            <span class="card-icon">⚡</span>
-                            <span class="card-text">An energetic baroque fugue like Bach</span>
+                        <div class="suggestion-card" onclick="suggest('A lyrical melody with building intensity like Tchaikovsky\'s 5th Symphony')">
+                            <span class="card-icon">🎻</span>
+                            <span class="card-text">Lyrical and building, like Tchaikovsky's 5th</span>
                         </div>
-                        <div class="suggestion-card" onclick="suggest('A playful waltz for a rainy afternoon')">
-                            <span class="card-icon">🌧️</span>
-                            <span class="card-text">A playful waltz for a rainy afternoon</span>
+                        <div class="suggestion-card" onclick="suggest('A tender, nostalgic piece like Tchaikovsky\'s June from The Seasons')">
+                            <span class="card-icon">🌿</span>
+                            <span class="card-text">Tender and nostalgic, like Tchaikovsky's June</span>
                         </div>
-                        <div class="suggestion-card" onclick="suggest('A dramatic theme like Beethoven')">
-                            <span class="card-icon">🎵</span>
-                            <span class="card-text">A dramatic theme like Beethoven</span>
+                        <div class="suggestion-card" onclick="suggest('An expansive, majestic theme like Sibelius\'s 5th Symphony finale')">
+                            <span class="card-icon">🌊</span>
+                            <span class="card-text">Majestic and expansive, like Sibelius's 5th finale</span>
                         </div>
                     </div>
                     <div class="chat-messages" id="chat-messages"></div>
                     <div class="sentence-builder">
                         <span class="sentence-text">Compose a </span>
                         <span class="slot" id="slot-mood" onclick="openSlot('mood')">
-                            melancholic<span class="arrow">&#9662;</span>
+                            sweeping<span class="arrow">&#9662;</span>
                             <div class="slot-dropdown" id="dd-mood"></div>
                         </span>
                         <span class="sentence-text"> </span>
                         <span class="slot" id="slot-form" onclick="openSlot('form')">
-                            nocturne<span class="arrow">&#9662;</span>
+                            concerto theme<span class="arrow">&#9662;</span>
                             <div class="slot-dropdown" id="dd-form"></div>
                         </span>
                         <span class="sentence-text"> in the style of </span>
                         <span class="slot" id="slot-style" onclick="openSlot('style')">
-                            Chopin<span class="arrow">&#9662;</span>
+                            Rachmaninoff<span class="arrow">&#9662;</span>
                             <div class="slot-dropdown" id="dd-style"></div>
                         </span>
                         <span class="randomize-btn" onclick="randomizeSlots()" title="Surprise me!">
@@ -420,7 +420,9 @@
                             displayProgress: true,
                             displayWarp: false
                         });
-                        synthControl.setTune(visualObj[0], false);
+                        synthControl.setTune(visualObj[0], false, {
+                            soundFontUrl: 'https://paulrosen.github.io/midi-js-soundfonts/FluidR3_GM/'
+                        });
                         synthControllers[scoreId] = synthControl;
                     } else {
                         document.getElementById(audioId).innerHTML =
@@ -481,11 +483,11 @@
 
         /* Sentence builder logic */
         var slotOptions = {
-            mood: ['melancholic', 'joyful', 'dramatic', 'peaceful', 'mysterious', 'heroic', 'tender', 'triumphant'],
-            form: ['nocturne', 'waltz', 'fugue', 'sonata', 'minuet', 'march', 'prelude', 'etude'],
-            style: ['Chopin', 'Bach', 'Mozart', 'Beethoven', 'Debussy', 'Tchaikovsky', 'Liszt', 'Schubert']
+            mood: ['sweeping', 'tender', 'triumphant', 'melancholic', 'passionate', 'nostalgic', 'heroic', 'mysterious'],
+            form: ['concerto theme', 'symphony theme', 'nocturne', 'waltz', 'romance', 'elegy', 'rhapsody', 'prelude'],
+            style: ['Rachmaninoff', 'Tchaikovsky', 'Sibelius', 'Chopin', 'Beethoven', 'Debussy', 'Liszt', 'Schubert']
         };
-        var slotValues = { mood: 'melancholic', form: 'nocturne', style: 'Chopin' };
+        var slotValues = { mood: 'sweeping', form: 'concerto theme', style: 'Rachmaninoff' };
 
         function initDropdowns() {
             Object.keys(slotOptions).forEach(function(group) {
