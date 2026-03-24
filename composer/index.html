@@ -65,6 +65,31 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            position: relative;
+            display: inline-block;
+        }
+        /* Floating notes beside title */
+        .composer-hero h1::before {
+            content: '\266B';
+            position: absolute;
+            left: -1.1em;
+            top: 0.15em;
+            font-size: 0.5em;
+            color: var(--pink-soft);
+            -webkit-text-fill-color: var(--pink-soft);
+            transform: rotate(-15deg);
+            opacity: 0.6;
+        }
+        .composer-hero h1::after {
+            content: '\266A';
+            position: absolute;
+            right: -1em;
+            bottom: 0.2em;
+            font-size: 0.45em;
+            color: var(--pink-soft);
+            -webkit-text-fill-color: var(--pink-soft);
+            transform: rotate(12deg);
+            opacity: 0.5;
         }
 
         .composer-hero .subtitle {
@@ -103,7 +128,21 @@
             max-width: 720px;
             margin: 0 auto;
             padding: 0 1em 3em;
+            position: relative;
         }
+        /* Scattered background notes */
+        .bg-note {
+            position: absolute;
+            color: var(--pink-soft);
+            opacity: 0.18;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+        .bg-note:nth-child(1) { top: 2%; right: -2em; font-size: 2em; transform: rotate(20deg); }
+        .bg-note:nth-child(2) { top: 25%; left: -2.5em; font-size: 1.4em; transform: rotate(-25deg); }
+        .bg-note:nth-child(3) { top: 55%; right: -1.5em; font-size: 1.8em; transform: rotate(35deg); }
+        .bg-note:nth-child(4) { top: 80%; left: -1.8em; font-size: 1.2em; transform: rotate(-10deg); }
 
         /* ── Suggestion cards ── */
         .suggestions {
@@ -171,14 +210,23 @@
         .chat-messages::-webkit-scrollbar-thumb { background: var(--pink-soft); border-radius: 4px; }
 
         .chat-messages:empty::before {
+            content: '\1D11E';
+            display: block;
+            text-align: center;
+            color: var(--pink-soft);
+            padding: 0.6em 0 0;
+            font-size: 3em;
+            opacity: 0.35;
+            line-height: 1;
+        }
+        .chat-messages:empty::after {
             content: "Your compositions will appear here...";
             display: block;
             text-align: center;
             color: var(--text-faint);
-            padding: 3em 0;
-
+            padding: 0.4em 0 2em;
             font-style: italic;
-            font-size: 1.05em;
+            font-size: 0.88em;
             letter-spacing: 0.02em;
         }
 
@@ -289,6 +337,12 @@
             transition: color 0.3s ease;
         }
         .sentence-builder:hover { color: var(--text); }
+        .sentence-note {
+            color: var(--pink-soft);
+            font-size: 1.1em;
+            vertical-align: middle;
+            margin-right: 0.1em;
+        }
 
         .slot {
             display: inline-block;
@@ -548,6 +602,10 @@
                 </div>
 
                 <div id="composer-app">
+                    <span class="bg-note">&#9835;</span>
+                    <span class="bg-note">&#9834;</span>
+                    <span class="bg-note">&#9833;</span>
+                    <span class="bg-note">&#9839;</span>
                     <div class="suggestions">
                         <div class="suggestion-card" onclick="suggest('A sweeping romantic theme like Rachmaninoff\'s Piano Concerto No. 2')">
                             <span class="card-icon">&#127929;</span>
@@ -568,7 +626,7 @@
                     </div>
                     <div class="chat-messages" id="chat-messages"></div>
                     <div class="sentence-builder">
-                        <span class="sentence-text">Compose a </span>
+                        <span class="sentence-note">&#9835;</span> <span class="sentence-text">Compose a </span>
                         <span class="slot" id="slot-mood" onclick="openSlot('mood')">
                             sweeping<span class="arrow">&#9662;</span>
                             <div class="slot-dropdown" id="dd-mood"></div>
