@@ -161,7 +161,19 @@
             background: var(--dw-accent); border-color: var(--dw-accent); color: #fff;
             box-shadow: 0 0 12px rgba(56,139,253,0.3);
         }
-        .demo-wrapper .controls button:disabled { opacity: 0.35; cursor: not-allowed; }
+        .demo-wrapper .controls button.next {
+            background: var(--dw-accent); border-color: var(--dw-accent); color: #fff;
+            animation: demoPulse 1.5s ease infinite;
+        }
+        .demo-wrapper .controls button.done {
+            background: var(--dw-green-muted); border-color: var(--dw-green); color: var(--dw-green);
+            opacity: 1;
+        }
+        .demo-wrapper .controls button:disabled { opacity: 0.5; cursor: not-allowed; color: var(--dw-text-subtle); }
+        @keyframes demoPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(56,139,253,0.4); }
+            50% { box-shadow: 0 0 12px 4px rgba(56,139,253,0.3); }
+        }
 
         .demo-wrapper .narrative {
             text-align: center; padding: 14px 24px; max-width: 800px; margin: 0 auto;
@@ -350,8 +362,66 @@
             box-shadow: 0 2px 8px rgba(248,81,73,0.3);
         }
 
+        /* ── Comparison panel ── */
+        .demo-wrapper .compare-panel {
+            display: none; max-width: 1060px; margin: 0 auto; padding: 0 20px 24px;
+        }
+        .demo-wrapper .compare-panel.visible { display: flex; gap: 20px; }
+        .demo-wrapper .compare-side {
+            flex: 1; border-radius: 8px; padding: 18px; border: 1px solid var(--dw-border);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .demo-wrapper .compare-side.engine { background: #1a1416; }
+        .demo-wrapper .compare-side.ours { background: var(--dw-surface); }
+        .demo-wrapper .compare-side h3 {
+            font-size: 0.88em; margin-bottom: 14px; letter-spacing: 0; text-transform: none;
+        }
+        .demo-wrapper .compare-side h3.engine-title { color: var(--dw-red); }
+        .demo-wrapper .compare-side h3.ours-title { color: var(--dw-green); }
+        .demo-wrapper .compare-step {
+            font-size: 0.82em; padding: 7px 10px; margin-bottom: 3px; border-radius: 6px;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.4s ease; color: var(--dw-text);
+        }
+        .demo-wrapper .compare-step .cs-num {
+            font-weight: 700; color: var(--dw-text-subtle); min-width: 14px;
+            font-family: 'SFMono-Regular', 'Menlo', monospace; font-size: 0.85em;
+        }
+        .demo-wrapper .compare-step .cs-name { flex: 1; }
+        .demo-wrapper .compare-step .cs-badge {
+            font-size: 0.65em; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .demo-wrapper .compare-checkpoint {
+            font-size: 0.68em; color: var(--dw-text-subtle); padding: 2px 8px; margin-bottom: 3px;
+            border-left: 2px dashed var(--dw-border); margin-left: 16px;
+            font-family: 'SFMono-Regular', 'Menlo', monospace;
+        }
+        .demo-wrapper .compare-error {
+            margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 0.8em;
+            animation: demoFadeIn 0.5s ease; line-height: 1.55;
+        }
+        .demo-wrapper .compare-error.red {
+            background: var(--dw-red-muted); border: 1px solid var(--dw-red); color: #ffa198;
+        }
+        .demo-wrapper .compare-error.green {
+            background: var(--dw-green-muted); border: 1px solid var(--dw-green); color: #7ee787;
+        }
+        .demo-wrapper .compare-error.amber {
+            background: rgba(210,153,34,0.1); border: 1px solid #d29922; color: #e3b341;
+        }
+        .demo-wrapper .compare-error strong { color: inherit; }
+        .demo-wrapper .compare-newstep { background: var(--dw-accent-muted); }
+        .demo-wrapper .compare-side.error-glow {
+            border-color: var(--dw-red); box-shadow: 0 0 20px rgba(248,81,73,0.12);
+        }
+        .demo-wrapper .compare-side.success-glow {
+            border-color: var(--dw-green); box-shadow: 0 0 20px rgba(63,185,80,0.12);
+        }
+
         @media (max-width: 768px) {
             .demo-wrapper .stage { flex-direction: column; }
+            .demo-wrapper .compare-panel.visible { flex-direction: column; }
             .orch-hero h1 { font-size: 1.6em; }
         }
 
@@ -472,16 +542,17 @@
                         </div>
 
                         <div class="controls">
-                            <button id="btn-start" class="active">Start Execution</button>
-                            <button id="btn-progress">Job Completes</button>
-                            <button id="btn-edit">Mid-Execution Edit</button>
-                            <button id="btn-fail">Job Fails + Retry</button>
-                            <button id="btn-complete">Plan Completion</button>
+                            <button id="btn-start" class="next">1. Start Execution</button>
+                            <button id="btn-progress" disabled>2. Job Completes</button>
+                            <button id="btn-edit" disabled>3. Mid-Execution Edit</button>
+                            <button id="btn-fail" disabled>4. Job Fails + Retry</button>
+                            <button id="btn-complete" disabled>5. Plan Completion</button>
+                            <button id="btn-compare" disabled>6. vs Checkpoint/Replay</button>
                             <button id="btn-reset">Reset</button>
                         </div>
 
                         <div class="narrative" id="narrative">
-                            Click <em>Start Execution</em> to see the reconciliation loop in action.
+                            Click the pulsing button to start the guided demo.
                         </div>
 
                         <div class="stage">
@@ -533,6 +604,19 @@
                                 <div id="jobs-container">
                                     <div style="color:#555; font-size:0.8em; padding:8px;">No jobs yet</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="compare-panel" id="compare-panel">
+                            <div class="compare-side engine" id="compare-engine">
+                                <h3 class="engine-title">Checkpoint/Replay (Temporal, Step Functions)</h3>
+                                <div id="engine-steps"></div>
+                                <div id="engine-message"></div>
+                            </div>
+                            <div class="compare-side ours" id="compare-ours">
+                                <h3 class="ours-title">Stateless Reconciliation (This Design)</h3>
+                                <div id="ours-steps"></div>
+                                <div id="ours-message"></div>
                             </div>
                         </div>
                     </div>
@@ -643,8 +727,21 @@
     }
 
     function highlightPlan(on) { $('plan-card').className = on ? 'plan-card highlight' : 'plan-card'; }
-    function disableButtons() { document.querySelectorAll('.demo-wrapper .controls button').forEach(b => b.disabled = true); }
-    function enableButtons() { document.querySelectorAll('.demo-wrapper .controls button').forEach(b => b.disabled = false); }
+
+    var scenarioOrder = ['btn-start','btn-progress','btn-edit','btn-fail','btn-complete','btn-compare'];
+    var currentStep = 0;
+
+    function disableButtons() { document.querySelectorAll('.demo-wrapper .controls button').forEach(function(b) { b.disabled = true; }); }
+    function enableButtons() {
+        $(scenarioOrder[currentStep]).className = 'done';
+        $(scenarioOrder[currentStep]).disabled = true;
+        currentStep++;
+        if (currentStep < scenarioOrder.length) {
+            $(scenarioOrder[currentStep]).disabled = false;
+            $(scenarioOrder[currentStep]).className = 'next';
+        }
+        $('btn-reset').disabled = false;
+    }
 
     async function scenarioStart() {
         disableButtons();
@@ -848,6 +945,66 @@
         enableButtons();
     }
 
+    async function scenarioCompare() {
+        disableButtons();
+        document.querySelector('.demo-wrapper .stage').style.display = 'none';
+        $('compare-panel').className = 'compare-panel visible';
+
+        var engineSteps = $('engine-steps');
+        var oursSteps = $('ours-steps');
+        var engineMsg = $('engine-message');
+        var oursMsg = $('ours-message');
+
+        setNarrative('Both systems start with the same plan. <strong>Step 1 is executing, Step 2 is next.</strong>');
+
+        var makeSteps = function(prefix) {
+            return '<div class="compare-step"><span class="cs-num">1</span><span class="cs-name">Analyze System</span><span class="cs-badge" style="background:' + 'rgba(56,139,253,0.15);color:#58a6ff" id="' + prefix + '-b1">EXECUTING</span></div>' +
+                '<div class="compare-checkpoint" id="' + prefix + '-cp1">checkpoint after step 1</div>' +
+                '<div class="compare-step"><span class="cs-num">2</span><span class="cs-name">Update Database</span><span class="cs-badge" style="background:#21262d;color:#484f58" id="' + prefix + '-b2">PENDING</span></div>' +
+                '<div class="compare-checkpoint" id="' + prefix + '-cp2">checkpoint after step 2</div>' +
+                '<div class="compare-step"><span class="cs-num">3</span><span class="cs-name">Transform Services</span><span class="cs-badge" style="background:#21262d;color:#484f58" id="' + prefix + '-b3">PENDING</span></div>';
+        };
+        engineSteps.innerHTML = makeSteps('e');
+        oursSteps.innerHTML = makeSteps('o');
+        engineMsg.innerHTML = '';
+        oursMsg.innerHTML = '';
+        await wait(2500);
+
+        setNarrative('User decides: <em>"Add a Security Scan step between steps 1 and 2."</em> What happens next?');
+        await wait(2500);
+
+        setNarrative('The checkpoint/replay engine has a problem...');
+        engineSteps.innerHTML =
+            '<div class="compare-step"><span class="cs-num">1</span><span class="cs-name">Analyze System</span><span class="cs-badge" style="background:rgba(56,139,253,0.15);color:#58a6ff">EXECUTING</span></div>' +
+            '<div class="compare-checkpoint">checkpoint after step 1 (recorded)</div>' +
+            '<div class="compare-step compare-newstep"><span class="cs-num">+</span><span class="cs-name">Security Scan</span><span class="cs-badge" style="background:rgba(210,153,34,0.15);color:#e3b341">NEW</span></div>' +
+            '<div class="compare-step"><span class="cs-num">2</span><span class="cs-name">Update Database</span><span class="cs-badge" style="background:#21262d;color:#484f58">PENDING</span></div>' +
+            '<div class="compare-step"><span class="cs-num">3</span><span class="cs-name">Transform Services</span><span class="cs-badge" style="background:#21262d;color:#484f58">PENDING</span></div>';
+        await wait(1500);
+
+        engineMsg.innerHTML = '<div class="compare-error red"><strong>REPLAY MISMATCH</strong><br>Event history says: after step 1 \u2192 step 2.<br>New code says: after step 1 \u2192 security scan.<br><br>The runtime cannot replay \u2014 the function changed but the history didn\'t.</div>';
+        $('compare-engine').classList.add('error-glow');
+        await wait(3000);
+
+        engineMsg.innerHTML += '<div class="compare-error amber" style="margin-top:8px"><strong>To fix, the engineer must:</strong><br>1. Write a signal handler for \u201Cadd step\u201D<br>2. Deploy new workflow code<br>3. Signal the running workflow<br>4. Or: cancel + restart with new code<br><br>Every possible change must be anticipated in code <em>before</em> it happens.</div>';
+        await wait(3500);
+
+        setNarrative('Meanwhile, in our design...');
+        oursSteps.innerHTML =
+            '<div class="compare-step"><span class="cs-num">1</span><span class="cs-name">Analyze System</span><span class="cs-badge" style="background:rgba(56,139,253,0.15);color:#58a6ff">IN PROGRESS</span></div>' +
+            '<div class="compare-step compare-newstep"><span class="cs-num">+</span><span class="cs-name">Security Scan</span><span class="cs-badge" style="background:#21262d;color:#484f58">NOT STARTED</span></div>' +
+            '<div class="compare-step"><span class="cs-num">2</span><span class="cs-name">Update Database</span><span class="cs-badge" style="background:#21262d;color:#484f58">NOT STARTED</span></div>' +
+            '<div class="compare-step"><span class="cs-num">3</span><span class="cs-name">Transform Services</span><span class="cs-badge" style="background:#21262d;color:#484f58">NOT STARTED</span></div>';
+        await wait(1500);
+
+        oursMsg.innerHTML = '<div class="compare-error green"><strong>No problem.</strong><br>User edits the plan \u2014 adds the step.<br>Next invocation: agent reads the plan, sees the new step, checks dependencies, executes when ready.<br><br>No replay. No signal handlers. No code change.<br>The agent just reads whatever the plan says.</div>';
+        $('compare-ours').classList.add('success-glow');
+        await wait(3000);
+
+        setNarrative('<strong>The core difference:</strong> Checkpoint/replay flexibility is bounded by what the engineer coded. Reconciliation flexibility is bounded by what the agent can understand \u2014 <em>which is anything in a document.</em>');
+        enableButtons();
+    }
+
     function reset() {
         jobs = {};
         stepStatuses = {1:'not-started',2:'not-started',3:'not-started',4:'not-started',5:'not-started'};
@@ -864,7 +1021,16 @@
         clearArrows();
         highlightPlan(false);
         agentSleep();
-        setNarrative('Click <em>Start Execution</em> to see the reconciliation loop in action.');
+        document.querySelector('.demo-wrapper .stage').style.display = 'flex';
+        $('compare-panel').className = 'compare-panel';
+        $('compare-engine').classList.remove('error-glow');
+        $('compare-ours').classList.remove('success-glow');
+        currentStep = 0;
+        scenarioOrder.forEach(function(id, i) {
+            $(id).disabled = i !== 0;
+            $(id).className = i === 0 ? 'next' : '';
+        });
+        setNarrative('Click the pulsing button to start the guided demo.');
     }
 
     $('btn-start').onclick = scenarioStart;
@@ -872,6 +1038,7 @@
     $('btn-edit').onclick = scenarioEdit;
     $('btn-fail').onclick = scenarioFail;
     $('btn-complete').onclick = scenarioComplete;
+    $('btn-compare').onclick = scenarioCompare;
     $('btn-reset').onclick = reset;
     </script>
 </body>
