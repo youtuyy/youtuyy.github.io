@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agentic Execution Engine — Zhaoyan Lin</title>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+    <style>
+        /* ── Hero ── */
+        .orch-hero {
+            text-align: center;
+            padding: 1.6em 1.5em 0.8em;
+        }
+        .orch-hero h1 {
+            font-size: 2em;
+            margin-bottom: 0.25em;
+            background: linear-gradient(135deg, #f2849e, #e8637a, #d4a0b0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .orch-hero .subtitle {
+            font-size: 0.92em;
+            font-weight: 300;
+            color: #888;
+            max-width: 560px;
+            margin: 0 auto;
+            line-height: 1.75;
+        }
+        .tech-badges {
+            margin-top: 1em;
+            display: flex;
+            justify-content: center;
+            gap: 0.5em;
+            flex-wrap: wrap;
+        }
+        .tech-badge {
+            display: inline-block;
+            padding: 0.2em 0.65em;
+            border: solid 1px #c9c9c9;
+            border-radius: 4px;
+            font-size: 0.65em;
+            font-weight: 600;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        /* ── Concept cards ── */
+        .concept-section {
+            max-width: 780px;
+            margin: 2em auto;
+            padding: 0 1em;
+        }
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1em;
+            margin-bottom: 2em;
+        }
+        .concept-card {
+            border: solid 1px #c9c9c9;
+            border-radius: 8px;
+            padding: 1.2em;
+            line-height: 1.65;
+        }
+        .concept-card h3 {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            font-weight: 900;
+            margin-bottom: 0.8em;
+            color: #585858;
+        }
+        .concept-card p {
+            font-size: 0.85em;
+            font-weight: 300;
+            color: #777;
+            margin: 0;
+        }
+        .concept-card .accent {
+            color: #f2849e;
+            font-weight: 600;
+        }
+        @media (max-width: 600px) { .concept-grid { grid-template-columns: 1fr; } }
+
+        /* ── Comparison table ── */
+        .comparison {
+            max-width: 780px;
+            margin: 0 auto 2em;
+            padding: 0 1em;
+        }
+        .comparison h2 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            font-weight: 900;
+            margin-bottom: 1.2em;
+            text-align: center;
+            color: #585858;
+        }
+        .comparison table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82em;
+            font-weight: 300;
+        }
+        .comparison th {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.75em;
+            color: #888;
+            text-align: left;
+            padding: 0.6em 0.8em;
+            border-bottom: 2px solid #c9c9c9;
+        }
+        .comparison td {
+            padding: 0.6em 0.8em;
+            border-bottom: 1px solid #e8e8e8;
+            color: #585858;
+        }
+        .comparison tr:last-child td { border-bottom: none; }
+
+        /* ── Visual demo container ── */
+        .demo-section {
+            margin: 2em 0;
+        }
+        .demo-section h2 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            font-weight: 900;
+            margin-bottom: 1.2em;
+            text-align: center;
+            color: #585858;
+        }
+        .demo-wrapper {
+            background: #0f1419;
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 1100px;
+            margin: 0 auto;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        }
+
+        /* ── Embedded visual styles ── */
+        .demo-wrapper .vis-header { text-align: center; padding: 24px 20px 8px; }
+        .demo-wrapper .vis-header h3 { font-size: 1.2em; font-weight: 600; color: #fff; margin: 0; letter-spacing: 0; text-transform: none; }
+        .demo-wrapper .vis-header p { color: #8899a6; margin-top: 6px; font-size: 0.88em; }
+
+        .demo-wrapper .controls { text-align: center; padding: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .demo-wrapper .controls button {
+            padding: 7px 18px; border: 1px solid #38444d; border-radius: 20px;
+            background: #1c2732; color: #e7e9ea; cursor: pointer; font-size: 0.82em;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .demo-wrapper .controls button:hover { background: #253341; border-color: #1d9bf0; }
+        .demo-wrapper .controls button.active { background: #1d9bf0; border-color: #1d9bf0; color: #fff; }
+        .demo-wrapper .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .demo-wrapper .narrative {
+            text-align: center; padding: 10px 20px; max-width: 800px; margin: 0 auto;
+            font-size: 0.82em; color: #8899a6; min-height: 36px;
+            border-top: 1px solid #1c2732;
+        }
+        .demo-wrapper .narrative em { color: #1d9bf0; font-style: normal; }
+        .demo-wrapper .narrative strong { color: #e7e9ea; }
+
+        .demo-wrapper .stage { display: flex; gap: 16px; padding: 16px; max-width: 1100px; margin: 0 auto; min-height: 420px; }
+        .demo-wrapper .col { flex: 1; min-width: 0; }
+        .demo-wrapper .col-header { font-size: 0.72em; text-transform: uppercase; letter-spacing: 1.5px; color: #8899a6; margin-bottom: 10px; padding-left: 4px; font-weight: 600; }
+
+        .demo-wrapper .plan-card {
+            background: #1c2732; border: 1px solid #38444d; border-radius: 10px; padding: 14px; margin-bottom: 8px;
+            transition: all 0.4s ease; position: relative;
+        }
+        .demo-wrapper .plan-card.highlight { border-color: #1d9bf0; box-shadow: 0 0 20px rgba(29,155,240,0.15); }
+        .demo-wrapper .plan-title { font-weight: 600; font-size: 0.95em; margin-bottom: 8px; color: #e7e9ea; }
+        .demo-wrapper .plan-meta { font-size: 0.75em; color: #8899a6; margin-bottom: 10px; }
+
+        .demo-wrapper .step {
+            display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+            margin-bottom: 3px; transition: all 0.4s ease; font-size: 0.82em; color: #e7e9ea;
+        }
+        .demo-wrapper .step .num { font-weight: 700; color: #8899a6; min-width: 14px; }
+        .demo-wrapper .step .name { flex: 1; }
+        .demo-wrapper .step .badge {
+            font-size: 0.7em; padding: 2px 7px; border-radius: 10px; font-weight: 600; white-space: nowrap;
+            transition: all 0.4s ease;
+        }
+        .demo-wrapper .badge.not-started { background: #253341; color: #8899a6; }
+        .demo-wrapper .badge.in-progress { background: #1a3a5c; color: #1d9bf0; }
+        .demo-wrapper .badge.completed { background: #1a3d2e; color: #00ba7c; }
+        .demo-wrapper .badge.failed { background: #3d1a1a; color: #f4212e; }
+        .demo-wrapper .step.flash { background: rgba(29,155,240,0.1); }
+        .demo-wrapper .step.flash-green { background: rgba(0,186,124,0.1); }
+        .demo-wrapper .step.flash-red { background: rgba(244,33,46,0.1); }
+
+        .demo-wrapper .agent-area { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .demo-wrapper .agent-icon {
+            width: 60px; height: 60px; border-radius: 50%; background: #253341; border: 2px solid #38444d;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5em;
+            transition: all 0.4s ease;
+        }
+        .demo-wrapper .agent-icon.active { border-color: #1d9bf0; background: #1a3a5c; box-shadow: 0 0 24px rgba(29,155,240,0.2); }
+        .demo-wrapper .agent-icon.sleeping { opacity: 0.4; }
+        .demo-wrapper .agent-thought {
+            background: #253341; border: 1px solid #38444d; border-radius: 8px; padding: 8px 12px;
+            font-size: 0.75em; line-height: 1.5; max-width: 240px; text-align: center;
+            min-height: 38px; transition: all 0.3s ease; color: #c4cdd5;
+        }
+
+        .demo-wrapper .arrow-group { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+        .demo-wrapper .arrow {
+            font-size: 0.68em; color: #38444d; transition: color 0.3s;
+            display: flex; align-items: center; gap: 3px;
+        }
+        .demo-wrapper .arrow.active { color: #1d9bf0; }
+        .demo-wrapper .arrow svg { width: 16px; height: 16px; }
+
+        .demo-wrapper .job {
+            display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px;
+            margin-bottom: 3px; background: #1c2732; border: 1px solid #38444d; font-size: 0.78em;
+            transition: all 0.4s ease; color: #e7e9ea;
+        }
+        .demo-wrapper .job.highlight { border-color: #1d9bf0; }
+        .demo-wrapper .job.new { animation: demoFadeIn 0.5s ease; }
+        .demo-wrapper .job .jid { color: #8899a6; font-family: monospace; font-size: 0.82em; }
+        .demo-wrapper .job .jstatus { font-size: 0.68em; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+        .demo-wrapper .jstatus.created { background: #253341; color: #8899a6; }
+        .demo-wrapper .jstatus.executing { background: #1a3a5c; color: #1d9bf0; }
+        .demo-wrapper .jstatus.completed { background: #1a3d2e; color: #00ba7c; }
+        .demo-wrapper .jstatus.failed { background: #3d1a1a; color: #f4212e; }
+
+        @keyframes demoFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .demo-wrapper .log-area { margin-top: 12px; }
+        .demo-wrapper .log-entry {
+            font-size: 0.7em; padding: 3px 8px; color: #8899a6; border-left: 2px solid #253341;
+            margin-bottom: 2px; animation: demoFadeIn 0.3s ease; font-family: monospace;
+        }
+        .demo-wrapper .log-entry.action { border-left-color: #1d9bf0; color: #b0c4d8; }
+        .demo-wrapper .log-entry.complete { border-left-color: #00ba7c; color: #7cc4a5; }
+        .demo-wrapper .log-entry.fail { border-left-color: #f4212e; color: #d88; }
+
+        .demo-wrapper .edit-indicator {
+            position: absolute; top: -6px; right: -6px; background: #f4212e; color: #fff;
+            font-size: 0.6em; padding: 2px 6px; border-radius: 8px; font-weight: 600;
+            animation: demoFadeIn 0.3s ease; display: none;
+        }
+
+        @media (max-width: 768px) {
+            .demo-wrapper .stage { flex-direction: column; }
+            .orch-hero h1 { font-size: 1.6em; }
+        }
+
+        /* ── How it works ── */
+        .how-section {
+            max-width: 780px;
+            margin: 2.5em auto;
+            padding: 0 1em;
+        }
+        .how-section h2 {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            font-weight: 900;
+            margin-bottom: 1.5em;
+            text-align: center;
+            color: #585858;
+        }
+        .how-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1em;
+        }
+        .how-step {
+            text-align: center;
+        }
+        .how-step .num-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: solid 2px #f2849e; color: #f2849e;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.7em; font-weight: 900; font-size: 0.85em;
+        }
+        .how-step h4 {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-weight: 900;
+            margin-bottom: 0.5em;
+            color: #585858;
+        }
+        .how-step p {
+            font-size: 0.78em;
+            font-weight: 300;
+            color: #888;
+            line-height: 1.6;
+            margin: 0;
+        }
+        @media (max-width: 600px) {
+            .how-steps { grid-template-columns: 1fr 1fr; gap: 1.5em; }
+        }
+    </style>
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+            <div class="inner">
+                <a href="../index.html" class="logo">
+                    <span class="symbol"><img src="../images/rabbit.svg" alt="" /></span>
+                    <span class="title">Zhaoyan Lin's Portfolio</span>
+                </a>
+                <nav><ul><li><a href="#menu">Menu</a></li></ul></nav>
+            </div>
+        </header>
+        <nav id="menu">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../project.html">Project</a></li>
+                <li><a href="../art.html">Art</a></li>
+                <li><a href="../other.html">Other</a></li>
+                <li><a href="../profile.html">Profile</a></li>
+            </ul>
+        </nav>
+
+        <div id="main">
+            <div class="inner">
+                <!-- Hero -->
+                <div class="orch-hero">
+                    <h1>Agentic Execution Engine</h1>
+                    <p class="subtitle">I designed an execution engine that drives multi-step plans to completion without a workflow server. The agent follows the controller pattern — read desired state, read actual state, close the gap, terminate. Stateless, crash-recoverable, and plans stay editable at any time.</p>
+                    <div class="tech-badges">
+                        <span class="tech-badge">Controller Pattern</span>
+                        <span class="tech-badge">Stateless Reconciliation</span>
+                        <span class="tech-badge">Event-Driven</span>
+                        <span class="tech-badge">Plan-as-Document</span>
+                    </div>
+                </div>
+
+                <!-- Concept cards -->
+                <div class="concept-section">
+                    <div class="concept-grid">
+                        <div class="concept-card">
+                            <h3>The Problem</h3>
+                            <p>Real-world agent tasks involve <span class="accent">5-50 steps</span> across days or weeks, mixing automated and manual work. Plans <span class="accent">change during execution</span> — users discover new requirements, add or remove steps. Traditional workflow engines treat this as an exception, not the norm.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>The Insight</h3>
+                            <p>Think of a <span class="accent">thermostat</span>: it reads the target temperature and the thermometer, turns the heater on or off, and forgets. If it reboots, it reads both values and continues perfectly. The orchestration agent works the same way — <span class="accent">stateless reconciliation</span> on every invocation.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>Key Design</h3>
+                            <p>Separate <span class="accent">command</span> from <span class="accent">sync</span>. The execute tool creates jobs but doesn't write the plan. The sync tool reconciles all state in one write. This makes parallel execution safe — no concurrency conflicts.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>Why Not a Workflow Engine?</h3>
+                            <p>Temporal, Airflow, and Step Functions all require the workflow definition in <span class="accent">code</span>. Our plans are <span class="accent">human-readable markdown</span> — editable by anyone, anytime, with no code deployment or server restart needed.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison table -->
+                <div class="comparison">
+                    <h2>Architecture Comparison</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Workflow Engine</th>
+                                <th>This Design</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Plan flexibility</td><td>Must engineer change patterns upfront</td><td>Edit markdown anytime</td></tr>
+                            <tr><td>Crash recovery</td><td>Deterministic replay</td><td>Stateless reconciliation</td></tr>
+                            <tr><td>Plan readability</td><td>Code / JSON</td><td>Human-readable markdown</td></tr>
+                            <tr><td>Infrastructure</td><td>Workflow server cluster</td><td>None (existing APIs)</td></tr>
+                            <tr><td>Audit trail</td><td>Built-in event history</td><td>Append-only execution log</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Interactive Demo -->
+                <div class="demo-section">
+                    <h2>Interactive Demo</h2>
+                    <div class="demo-wrapper">
+                        <div class="vis-header">
+                            <h3>Stateless Reconciliation Engine</h3>
+                            <p>Watch the controller pattern drive a plan to completion</p>
+                        </div>
+
+                        <div class="controls">
+                            <button id="btn-start" class="active">Start Execution</button>
+                            <button id="btn-progress">Job Completes</button>
+                            <button id="btn-edit">Mid-Execution Edit</button>
+                            <button id="btn-fail">Job Fails + Retry</button>
+                            <button id="btn-complete">Plan Completion</button>
+                            <button id="btn-reset">Reset</button>
+                        </div>
+
+                        <div class="narrative" id="narrative">
+                            Click <em>Start Execution</em> to see the reconciliation loop in action.
+                        </div>
+
+                        <div class="stage">
+                            <!-- Plan (Desired State) -->
+                            <div class="col">
+                                <div class="col-header">Plan (Desired State)</div>
+                                <div class="plan-card" id="plan-card">
+                                    <div class="plan-title">System Upgrade Project</div>
+                                    <div class="plan-meta" id="plan-meta">Status: APPROVED</div>
+                                    <div class="edit-indicator" id="edit-badge">EDITED</div>
+                                    <div id="steps-container">
+                                        <div class="step" id="step-1"><span class="num">1</span><span class="name">Analyze System</span><span class="badge not-started" id="badge-1">NOT STARTED</span></div>
+                                        <div class="step" id="step-2"><span class="num">2</span><span class="name">Update Database</span><span class="badge not-started" id="badge-2">NOT STARTED</span></div>
+                                        <div class="step" id="step-3"><span class="num">3</span><span class="name">Transform Services</span><span class="badge not-started" id="badge-3">NOT STARTED</span></div>
+                                        <div class="step" id="step-4"><span class="num">4</span><span class="name">Manual QA</span><span class="badge not-started" id="badge-4">NOT STARTED</span></div>
+                                        <div class="step" id="step-5"><span class="num">5</span><span class="name">Deploy</span><span class="badge not-started" id="badge-5">NOT STARTED</span></div>
+                                    </div>
+                                </div>
+                                <div class="log-area" id="exec-log"></div>
+                            </div>
+
+                            <!-- Agent (Controller) -->
+                            <div class="col" style="max-width: 260px;">
+                                <div class="col-header" style="text-align:center;">Agent (Controller)</div>
+                                <div class="agent-area">
+                                    <div class="agent-icon sleeping" id="agent-icon">&#129302;</div>
+                                    <div class="agent-thought" id="agent-thought">
+                                        <span style="color:#555">Agent is idle — waiting for trigger</span>
+                                    </div>
+                                    <div class="arrow-group">
+                                        <div class="arrow" id="arrow-read">
+                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+                                            read plan + jobs
+                                        </div>
+                                        <div class="arrow" id="arrow-diff">
+                                            &#8635; compute diff
+                                        </div>
+                                        <div class="arrow" id="arrow-act">
+                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                                            take action
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Execution Backend (Actual State) -->
+                            <div class="col">
+                                <div class="col-header">Jobs (Actual State)</div>
+                                <div id="jobs-container">
+                                    <div style="color:#555; font-size:0.8em; padding:8px;">No jobs yet</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How it works -->
+                <div class="how-section">
+                    <h2>The Reconciliation Loop</h2>
+                    <div class="how-steps">
+                        <div class="how-step">
+                            <div class="num-circle">1</div>
+                            <h4>Read</h4>
+                            <p>Download the plan (desired state) and query all jobs (actual state)</p>
+                        </div>
+                        <div class="how-step">
+                            <div class="num-circle">2</div>
+                            <h4>Diff</h4>
+                            <p>Compare desired vs actual. Find steps that are unblocked and ready to execute</p>
+                        </div>
+                        <div class="how-step">
+                            <div class="num-circle">3</div>
+                            <h4>Act</h4>
+                            <p>Create jobs for unblocked steps, sync statuses back to the plan in one write</p>
+                        </div>
+                        <div class="how-step">
+                            <div class="num-circle">4</div>
+                            <h4>Terminate</h4>
+                            <p>Agent exits. No persistent process. Next event triggers a fresh invocation</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div class="inner">
+                <section>
+                    <h2>Follow</h2>
+                    <ul class="icons">
+                        <li><a href="https://www.instagram.com/youtuyy/" class="icon style2 fa-instagram"><span class="label">Instagram</span></a></li>
+                        <li><a href="https://github.com/youtuyy" class="icon style2 fa-github"><span class="label">GitHub</span></a></li>
+                        <li><a href="mailto:linzhaoyan@hotmail.com" class="icon style2 fa-envelope-o"><span class="label">Email</span></a></li>
+                    </ul>
+                </section>
+                <ul class="copyright"><li>&copy; Zhaoyan Lin 2026</li></ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/browser.min.js"></script>
+    <script src="../assets/js/breakpoints.min.js"></script>
+    <script src="../assets/js/util.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+    const $ = id => document.getElementById(id);
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+
+    let jobs = {};
+    let stepStatuses = {1:'not-started',2:'not-started',3:'not-started',4:'not-started',5:'not-started'};
+    let logEntries = [];
+    let step6Added = false;
+
+    function setNarrative(html) { $('narrative').innerHTML = html; }
+    function setThought(html) { $('agent-thought').innerHTML = html; }
+    function agentWake() { $('agent-icon').className = 'agent-icon active'; }
+    function agentSleep() { $('agent-icon').className = 'agent-icon sleeping'; setThought('<span style="color:#555">Agent terminated — waiting for next trigger</span>'); }
+
+    function setStepBadge(n, status, label) {
+        stepStatuses[n] = status;
+        const b = $('badge-' + n);
+        if (!b) return;
+        b.className = 'badge ' + status;
+        b.textContent = label || status.replace('-', ' ').toUpperCase();
+    }
+
+    function flashStep(n, cls) {
+        const el = $('step-' + n);
+        if (!el) return;
+        el.classList.add(cls || 'flash');
+        setTimeout(() => el.classList.remove(cls || 'flash'), 800);
+    }
+
+    function setArrow(id, active) { $(id).className = active ? 'arrow active' : 'arrow'; }
+    function clearArrows() { ['arrow-read','arrow-diff','arrow-act'].forEach(a => setArrow(a, false)); }
+
+    function renderJobs() {
+        const c = $('jobs-container');
+        const ids = Object.keys(jobs);
+        if (ids.length === 0) { c.innerHTML = '<div style="color:#555;font-size:0.8em;padding:8px;">No jobs yet</div>'; return; }
+        c.innerHTML = ids.map(id => {
+            const j = jobs[id];
+            return '<div class="job' + (j.highlight ? ' highlight' : '') + (j.isNew ? ' new' : '') + '" id="job-' + id + '">' +
+                '<span class="jid">' + id + '</span>' +
+                '<span style="flex:1;font-size:0.82em">Step ' + j.step + ': ' + j.name + '</span>' +
+                '<span class="jstatus ' + j.status + '">' + j.status.toUpperCase() + '</span>' +
+                '</div>';
+        }).join('');
+        Object.values(jobs).forEach(j => { j.isNew = false; j.highlight = false; });
+    }
+
+    function addLog(text, cls) {
+        logEntries.push({text: text, cls: cls || ''});
+        const el = $('exec-log');
+        el.innerHTML = logEntries.map(e => '<div class="log-entry ' + e.cls + '">' + e.text + '</div>').join('');
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightPlan(on) { $('plan-card').className = on ? 'plan-card highlight' : 'plan-card'; }
+    function disableButtons() { document.querySelectorAll('.demo-wrapper .controls button').forEach(b => b.disabled = true); }
+    function enableButtons() { document.querySelectorAll('.demo-wrapper .controls button').forEach(b => b.disabled = false); }
+
+    async function scenarioStart() {
+        disableButtons();
+        setNarrative('User says: <em>"Execute the plan"</em> — new agent invocation starts');
+        await wait(1200);
+
+        agentWake();
+        setThought('Invocation started.<br>Loading plan + jobs...');
+        setArrow('arrow-read', true);
+        highlightPlan(true);
+        await wait(1500);
+
+        setThought('Plan: 5 steps, all NOT_STARTED.<br>Jobs: none.<br><strong>Diff: Steps 1,2 unblocked</strong>');
+        setArrow('arrow-read', false);
+        setArrow('arrow-diff', true);
+        await wait(1800);
+
+        setArrow('arrow-diff', false);
+        setArrow('arrow-act', true);
+        setThought('Creating jobs for<br>Steps 1 & 2 (parallel)...');
+        await wait(1000);
+
+        jobs['job-abc'] = {step:1, name:'Analyze System', status:'executing', isNew:true, highlight:true};
+        jobs['job-def'] = {step:2, name:'Update Database', status:'executing', isNew:true, highlight:true};
+        renderJobs();
+        addLog('09:15 — Step 1 started (job-abc)', 'action');
+        addLog('09:15 — Step 2 started (job-def)', 'action');
+        await wait(1200);
+
+        setThought('Syncing plan content...<br>Steps 1,2 → IN_PROGRESS');
+        setStepBadge(1, 'in-progress', 'IN PROGRESS');
+        setStepBadge(2, 'in-progress', 'IN PROGRESS');
+        flashStep(1); flashStep(2);
+        await wait(1200);
+
+        setNarrative('<strong>Agent terminates.</strong> Jobs run asynchronously (minutes-hours). Plan and job records hold all state. <em>No persistent process.</em>');
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        renderJobs();
+        enableButtons();
+    }
+
+    async function scenarioProgress() {
+        disableButtons();
+        setNarrative('Job <em>job-abc</em> (Step 1) completes — notification triggers new agent invocation');
+        jobs['job-abc'].status = 'completed';
+        jobs['job-abc'].highlight = true;
+        renderJobs();
+        await wait(1500);
+
+        agentWake();
+        setThought('Notification received.<br>Reading plan + jobs...');
+        setArrow('arrow-read', true);
+        highlightPlan(true);
+        await wait(1200);
+
+        setArrow('arrow-read', false);
+        setArrow('arrow-diff', true);
+        setThought('job-abc: COMPLETED<br>job-def: still EXECUTING<br><strong>Diff: Step 1 done → Step 3 unblocked!</strong>');
+        await wait(2000);
+
+        setArrow('arrow-diff', false);
+        setArrow('arrow-act', true);
+        setStepBadge(1, 'completed', 'COMPLETED');
+        flashStep(1, 'flash-green');
+        addLog('11:42 — Step 1 completed (2h 27m)', 'complete');
+        await wait(800);
+
+        setThought('Step 3 unblocked.<br>Creating job...');
+        jobs['job-ghi'] = {step:3, name:'Transform Services', status:'executing', isNew:true, highlight:true};
+        renderJobs();
+        setStepBadge(3, 'in-progress', 'IN PROGRESS');
+        flashStep(3);
+        addLog('11:42 — Step 3 started (job-ghi)', 'action');
+        await wait(1200);
+
+        setNarrative('<strong>Reconciliation complete.</strong> Agent read desired state (plan) vs actual state (jobs), computed the diff, took action, terminated. <em>Stateless — no memory of previous invocation.</em>');
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        renderJobs();
+        enableButtons();
+    }
+
+    async function scenarioEdit() {
+        disableButtons();
+        setNarrative('User edits the plan while jobs are running: <em>adds Step 6 (Security Scan) between Steps 3 and 4</em>');
+        await wait(1500);
+
+        $('edit-badge').style.display = 'block';
+        var container = $('steps-container');
+        var step4 = $('step-4');
+        var newStep = document.createElement('div');
+        newStep.className = 'step flash';
+        newStep.id = 'step-6';
+        newStep.innerHTML = '<span class="num">6</span><span class="name">Security Scan</span><span class="badge not-started" id="badge-6">NOT STARTED</span>';
+        container.insertBefore(newStep, step4);
+        stepStatuses[6] = 'not-started';
+        addLog('12:30 — Plan edited: Step 6 (Security Scan) added', 'action');
+        step6Added = true;
+        await wait(2000);
+
+        setNarrative('User says <em>"continue"</em> — agent invocation. Agent reads the <strong>current</strong> plan — sees the new step. No code change needed.');
+        agentWake();
+        setThought('Reading plan...<br>Found 6 steps (was 5).<br>Step 6 is new, NOT_STARTED.<br><strong>Plan changed — and that\'s fine.</strong>');
+        setArrow('arrow-read', true);
+        highlightPlan(true);
+        $('edit-badge').style.display = 'none';
+        await wait(2500);
+
+        setArrow('arrow-read', false);
+        setArrow('arrow-diff', true);
+        setThought('Step 6 depends on Step 3.<br>Step 3 still IN_PROGRESS.<br><strong>No action needed yet.</strong><br>Will execute Step 6 when Step 3 completes.');
+        await wait(2500);
+
+        setNarrative('<strong>Key insight:</strong> The agent doesn\'t care that the plan changed. It just reads current state and acts. <em>No workflow restart, no replay, no code deployment.</em>');
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        enableButtons();
+    }
+
+    async function scenarioFail() {
+        disableButtons();
+        setNarrative('Job <em>job-def</em> (Step 2: Update Database) fails — connection timeout');
+        jobs['job-def'].status = 'failed';
+        jobs['job-def'].highlight = true;
+        renderJobs();
+        await wait(1500);
+
+        agentWake();
+        setThought('Notification: job-def FAILED.<br>Reading plan + jobs...');
+        setArrow('arrow-read', true);
+        highlightPlan(true);
+        await wait(1200);
+
+        setArrow('arrow-read', false);
+        setArrow('arrow-diff', true);
+        setStepBadge(2, 'failed', 'FAILED');
+        flashStep(2, 'flash-red');
+        addLog('14:00 — Step 2 FAILED: connection timeout', 'fail');
+        setThought('<strong>Step 2 FAILED</strong><br>Steps 4, 5 blocked.<br>Asking user...');
+        await wait(2000);
+
+        setNarrative('Agent: <em>"Step 2 failed (connection timeout). Retry, skip, or abort?"</em> — User: <em>"retry"</em>');
+        await wait(2000);
+
+        setArrow('arrow-diff', false);
+        setArrow('arrow-act', true);
+        setThought('Retrying Step 2...<br>Creating NEW job (old one stays in history)');
+        jobs['job-mno'] = {step:2, name:'Update Database', status:'executing', isNew:true, highlight:true};
+        renderJobs();
+        setStepBadge(2, 'in-progress', 'IN PROGRESS');
+        flashStep(2);
+        addLog('14:15 — Step 2 retried → new job-mno', 'action');
+        await wait(1500);
+
+        setNarrative('<strong>Retry = new job with same tags.</strong> Old job stays in history. Execution log captures both attempts. <em>Agent doesn\'t need to remember the failure — it\'s in the log.</em>');
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        renderJobs();
+        enableButtons();
+    }
+
+    async function scenarioComplete() {
+        disableButtons();
+        setNarrative('All jobs complete — final reconciliation');
+        Object.keys(jobs).forEach(function(id) { if(jobs[id].status !== 'failed') jobs[id].status = 'completed'; });
+        renderJobs();
+        await wait(1000);
+
+        agentWake();
+        setArrow('arrow-read', true);
+        setThought('Reading plan + jobs...<br>All jobs COMPLETED.');
+        highlightPlan(true);
+        await wait(1200);
+
+        setArrow('arrow-read', false);
+        setArrow('arrow-diff', true);
+        setThought('<strong>All steps COMPLETED!</strong><br>Transitioning plan...');
+        await wait(1000);
+
+        [1,2,3,4,5].forEach(function(n) { setStepBadge(n, 'completed', 'COMPLETED'); flashStep(n, 'flash-green'); });
+        if (step6Added) { setStepBadge(6, 'completed', 'COMPLETED'); }
+        await wait(800);
+
+        setArrow('arrow-diff', false);
+        setArrow('arrow-act', true);
+        $('plan-meta').textContent = 'Status: COMPLETED';
+        $('plan-meta').style.color = '#00ba7c';
+        addLog('16:30 — All steps completed', 'complete');
+        addLog('16:30 — Plan → COMPLETED', 'complete');
+        await wait(1000);
+
+        setNarrative('<strong>Plan complete.</strong> The controller pattern drove it to convergence: read desired state, read actual state, close the gap. <em>No workflow server. No persistent process. Just reconciliation.</em>');
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        enableButtons();
+    }
+
+    function reset() {
+        jobs = {};
+        stepStatuses = {1:'not-started',2:'not-started',3:'not-started',4:'not-started',5:'not-started'};
+        logEntries = [];
+        step6Added = false;
+        [1,2,3,4,5].forEach(function(n) { setStepBadge(n, 'not-started', 'NOT STARTED'); });
+        var s6 = $('step-6');
+        if (s6) s6.remove();
+        renderJobs();
+        $('exec-log').innerHTML = '';
+        $('plan-meta').textContent = 'Status: APPROVED';
+        $('plan-meta').style.color = '#8899a6';
+        $('edit-badge').style.display = 'none';
+        clearArrows();
+        highlightPlan(false);
+        agentSleep();
+        setNarrative('Click <em>Start Execution</em> to see the reconciliation loop in action.');
+    }
+
+    $('btn-start').onclick = scenarioStart;
+    $('btn-progress').onclick = scenarioProgress;
+    $('btn-edit').onclick = scenarioEdit;
+    $('btn-fail').onclick = scenarioFail;
+    $('btn-complete').onclick = scenarioComplete;
+    $('btn-reset').onclick = reset;
+    </script>
+</body>
+</html>

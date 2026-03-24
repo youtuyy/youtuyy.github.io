@@ -53,6 +53,16 @@
                             <h1>Project</h1>
                             <div>
                                 <div class="inner">
+                                    <h2 id="orchestration">Agentic Execution Engine</h2>
+                                    <b>Agentic Execution Engine</b> is an architecture I designed for AI agents that execute multi-step plans without a workflow server. The agent follows the controller pattern — read desired state, read actual state, close the gap, terminate. Plans are human-readable documents, freely editable at any time, with stateless crash recovery via reconciliation.
+                                    <p></p>
+                                    <p><a href="orchestration/">Interactive Demo</a>
+                                    </p>
+                                    <p>
+                                    - Controller Pattern, Stateless Reconciliation, Event-Driven Architecture, Plan-as-Document</p>
+                                </div>
+                                <hr />
+                                <div class="inner">
                                     <h2 id="agent">Conversation Segmentation for Multi-Tenant Agents</h2>
                                     <b>Conversation Segmentation</b> is an architecture I designed for handling multi-tenant agent communication. In production agentic systems, a single AI agent receives interleaved messages from multiple sources — end users, orchestrator agents, and tool-calling agents. Without segmentation, contexts bleed across tenants. My approach classifies each incoming message by tenant identity and conversational context, routing it to an isolated thread with its own state — enabling true multi-tenant operation without cross-contamination.
                                     <p></p>
