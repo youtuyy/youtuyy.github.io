@@ -79,6 +79,16 @@
                                 </div>
                                 <hr />
                                 <div class="inner">
+                                    <h2 id="auth-proxy">Agent Auth Proxy</h2>
+                                    <b>Agent Auth Proxy</b> is a unified authorization layer I designed for multi-agent systems. Calls come from two worlds — a user in a chat session, or an autonomous agent running headless. The proxy runs three steps: RBAC (skipped if no user), grant check (scoped allow/deny), and execute. Short-lived grants are user-scoped; long-lived grants are workspace-scoped so headless agents can use pre-authorized permissions.
+                                    <p></p>
+                                    <p><a href="auth-proxy/">Interactive Demo</a>
+                                    </p>
+                                    <p>
+                                    - Multi-Agent Auth, RBAC, Scoped Grants, Interactive Consent</p>
+                                </div>
+                                <hr />
+                                <div class="inner">
                                     <h2 id="composer">AI Music Composer</h2>
                                     <b>AI Music Composer</b> is a web application that generates original classical music from natural language descriptions. Describe a mood, style, or composer influence, and the AI composes music rendered as interactive sheet music with in-browser playback. Built with Claude API, Vercel serverless functions, and abcjs.
                                     <p></p>
