@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Auth Proxy — Zhaoyan Lin</title>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+    <style>
+        /* ── Hero ── */
+        .ap-hero { text-align: center; padding: 1.6em 1.5em 0.8em; }
+        .ap-hero h1 {
+            font-size: 2em; margin-bottom: 0.25em;
+            background: linear-gradient(135deg, #f2849e, #e8637a, #d4a0b0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .ap-hero .subtitle {
+            font-size: 0.92em; font-weight: 300; color: #888;
+            max-width: 560px; margin: 0 auto; line-height: 1.75;
+        }
+        .tech-badges { margin-top: 1em; display: flex; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+        .tech-badge {
+            display: inline-block; padding: 0.2em 0.65em; border: solid 1px #c9c9c9;
+            border-radius: 4px; font-size: 0.65em; font-weight: 600;
+            letter-spacing: 0.35em; text-transform: uppercase; color: #888;
+        }
+
+        /* ── Section headings ── */
+        .section-head {
+            font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.35em;
+            font-weight: 900; margin-bottom: 1.2em; text-align: center; color: #585858;
+        }
+
+        /* ── Concept cards ── */
+        .concept-section { max-width: 780px; margin: 2em auto; padding: 0 1em; }
+        .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-bottom: 2em; }
+        .concept-card {
+            border: solid 1px #c9c9c9; border-bottom: solid 3px #b0b0b0; border-radius: 8px;
+            padding: 1.2em; line-height: 1.65;
+            background: linear-gradient(180deg, #fff 0%, #f9f9f9 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .concept-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.06), 0 10px 20px rgba(0,0,0,0.05); }
+        .concept-card h3 { font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.25em; font-weight: 900; margin-bottom: 0.8em; color: #585858; }
+        .concept-card p { font-size: 0.85em; font-weight: 300; color: #777; margin: 0; }
+        .concept-card .accent { color: #f2849e; font-weight: 600; }
+        @media (max-width: 600px) { .concept-grid { grid-template-columns: 1fr; } }
+
+        /* ── Dark demo wrapper ── */
+        .demo-section { margin: 2em 0; }
+        .demo-wrapper {
+            --dw-bg: #0d1117;
+            --dw-surface: #161b22;
+            --dw-surface-raised: #1c2129;
+            --dw-border: #30363d;
+            --dw-border-muted: #21262d;
+            --dw-text: #e6edf3;
+            --dw-text-muted: #8b949e;
+            --dw-text-subtle: #484f58;
+            --dw-accent: #58a6ff;
+            --dw-pink: #f2849e;
+            --dw-green: #3fb950;
+            --dw-green-muted: rgba(46,160,67,0.15);
+            --dw-red: #f85149;
+            --dw-red-muted: rgba(248,81,73,0.1);
+            --dw-yellow: #d29922;
+            --dw-yellow-muted: rgba(210,153,34,0.1);
+            background: var(--dw-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 0 0 1px var(--dw-border-muted), 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--dw-text);
+        }
+
+        /* ── Tabs ── */
+        .demo-wrapper .ap-tabs { display: flex; gap: 2px; padding: 16px 24px 0; }
+        .demo-wrapper .ap-tab {
+            padding: 10px 20px; background: var(--dw-surface); border: 1px solid var(--dw-border);
+            border-bottom: none; border-radius: 8px 8px 0 0; cursor: pointer;
+            font-size: 14px; font-weight: 600; color: var(--dw-text-muted); font-family: inherit;
+            text-transform: none; letter-spacing: 0; line-height: 1; box-shadow: none;
+        }
+        .demo-wrapper .ap-tab.active { background: var(--dw-surface-raised); color: var(--dw-text); border-color: var(--dw-pink); border-bottom: 2px solid var(--dw-surface-raised); position: relative; z-index: 1; }
+        .demo-wrapper .ap-tab-content { display: none; background: var(--dw-surface-raised); border: 1px solid var(--dw-border); border-top: 1px solid var(--dw-pink); border-radius: 0 8px 8px 8px; padding: 24px; margin: 0 24px 24px; }
+        .demo-wrapper .ap-tab-content.active { display: block; }
+
+        /* ── Architecture ── */
+        .demo-wrapper .arch-row { display: flex; align-items: stretch; gap: 16px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
+        .demo-wrapper .arch-box { padding: 14px 18px; border-radius: 10px; border: 2px solid var(--dw-border); background: var(--dw-surface); text-align: center; min-width: 140px; }
+        .demo-wrapper .arch-box h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; text-transform: none; letter-spacing: 0; }
+        .demo-wrapper .arch-box p { font-size: 11px; color: var(--dw-text-muted); line-height: 1.4; margin: 0; }
+        .demo-wrapper .arch-box.user { border-color: var(--dw-accent); background: rgba(88,166,255,0.05); }
+        .demo-wrapper .arch-box.user h3 { color: var(--dw-accent); }
+        .demo-wrapper .arch-box.nouser { border-color: var(--dw-text-subtle); background: rgba(139,148,158,0.03); border-style: dashed; }
+        .demo-wrapper .arch-box.nouser h3 { color: var(--dw-text-muted); }
+        .demo-wrapper .arch-box.proxy { border-color: var(--dw-pink); background: rgba(242,132,158,0.06); min-width: 500px; }
+        .demo-wrapper .arch-box.proxy h3 { color: var(--dw-pink); }
+        .demo-wrapper .arch-box.rbac { border-color: var(--dw-green); background: rgba(63,185,80,0.05); }
+        .demo-wrapper .arch-box.rbac h3 { color: var(--dw-green); }
+        .demo-wrapper .arch-box.grantstore { border-color: var(--dw-yellow); background: rgba(210,153,34,0.05); }
+        .demo-wrapper .arch-box.grantstore h3 { color: var(--dw-yellow); }
+        .demo-wrapper .arch-box.service { border-color: var(--dw-text-muted); background: rgba(139,148,158,0.05); }
+
+        .demo-wrapper .arch-arrow { text-align: center; color: var(--dw-text-subtle); font-size: 14px; margin: 4px 0; line-height: 1.2; }
+        .demo-wrapper .arch-arrow .label { font-size: 11px; color: #6e7681; font-style: italic; }
+
+        .demo-wrapper .proxy-inner { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+        .demo-wrapper .proxy-step { flex: 1; padding: 10px; border-radius: 8px; border: 1px dashed var(--dw-border); background: var(--dw-bg); min-width: 120px; }
+        .demo-wrapper .proxy-step h4 { font-size: 12px; font-weight: 700; margin-bottom: 4px; text-transform: none; letter-spacing: 0; }
+        .demo-wrapper .proxy-step.s1 h4 { color: var(--dw-green); }
+        .demo-wrapper .proxy-step.s2 h4 { color: var(--dw-yellow); }
+        .demo-wrapper .proxy-step.s3 h4 { color: var(--dw-accent); }
+        .demo-wrapper .proxy-step p { font-size: 11px; color: var(--dw-text-muted); margin: 0; }
+
+        .demo-wrapper .callout { padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; line-height: 1.6; }
+        .demo-wrapper .callout b { color: var(--dw-text); }
+        .demo-wrapper .callout.nouser { background: rgba(139,148,158,0.05); border: 1px solid var(--dw-text-subtle); }
+        .demo-wrapper .callout.nouser b { color: var(--dw-text-muted); }
+        .demo-wrapper .callout.pink { background: rgba(242,132,158,0.06); border: 1px solid var(--dw-pink); }
+        .demo-wrapper .callout.pink b { color: var(--dw-pink); }
+        .demo-wrapper .callout code {
+            display: block; background: var(--dw-bg); padding: 12px; border-radius: 6px;
+            margin: 8px 0; font-size: 12px; line-height: 2;
+        }
+
+        /* ── Simulator ── */
+        .demo-wrapper .sim-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .demo-wrapper .panel { background: var(--dw-surface); border: 1px solid var(--dw-border); border-radius: 12px; padding: 20px; }
+        .demo-wrapper .panel h2 { font-size: 14px; font-weight: 600; color: var(--dw-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; text-align: left; }
+        .demo-wrapper .control-group { margin-bottom: 14px; }
+        .demo-wrapper .control-group label { display: block; font-size: 13px; color: var(--dw-text-muted); margin-bottom: 6px; font-weight: normal; }
+        .demo-wrapper select, .demo-wrapper .sim-btn {
+            width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--dw-border);
+            background: var(--dw-bg); color: var(--dw-text); font-size: 14px; cursor: pointer; font-family: inherit;
+            text-transform: none; letter-spacing: 0; line-height: 1; box-shadow: none;
+        }
+        .demo-wrapper select:hover, .demo-wrapper .sim-btn:hover { border-color: var(--dw-pink); }
+        .demo-wrapper select:disabled { opacity: 0.35; cursor: not-allowed; }
+        .demo-wrapper .sim-btn.primary { background: #f2849e; border-color: #f2849e; color: #fff; font-weight: 600; margin-top: 8px; }
+        .demo-wrapper .sim-btn.primary:hover { background: #e8637a; border-color: #e8637a; }
+        .demo-wrapper .sim-btn.preauth { background: #ae85ca; border-color: #ae85ca; color: #fff; font-weight: 600; }
+        .demo-wrapper .sim-btn.danger { background: var(--dw-surface); border-color: var(--dw-red); color: var(--dw-red); font-size: 12px; padding: 6px 12px; margin-top: 12px; }
+        .demo-wrapper .sim-btn.danger:hover { background: var(--dw-red-muted); }
+
+        /* Toggle */
+        .demo-wrapper .toggle-row { display: flex; align-items: center; gap: 10px; }
+        .demo-wrapper .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .demo-wrapper .toggle input { opacity: 0; width: 0; height: 0; }
+        .demo-wrapper .toggle .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--dw-border); border-radius: 24px; transition: 0.3s; }
+        .demo-wrapper .toggle .slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: var(--dw-text-muted); border-radius: 50%; transition: 0.3s; }
+        .demo-wrapper .toggle input:checked + .slider { background: #f2849e; }
+        .demo-wrapper .toggle input:checked + .slider:before { transform: translateX(20px); background: #fff; }
+        .demo-wrapper .toggle-label { font-size: 13px; }
+        .demo-wrapper .toggle-label .hint { font-size: 11px; color: var(--dw-text-subtle); display: block; margin-top: 2px; }
+
+        /* Flow steps */
+        .demo-wrapper .flow-step { padding: 14px; border: 2px solid var(--dw-border); border-radius: 10px; background: var(--dw-surface); transition: all 0.4s ease; margin-bottom: 2px; }
+        .demo-wrapper .flow-step.pass { border-color: var(--dw-green); background: rgba(63,185,80,0.04); }
+        .demo-wrapper .flow-step.fail { border-color: var(--dw-red); background: rgba(248,81,73,0.04); }
+        .demo-wrapper .flow-step.ask { border-color: var(--dw-yellow); background: rgba(210,153,34,0.04); }
+        .demo-wrapper .flow-step.skip { border-color: var(--dw-text-subtle); background: rgba(139,148,158,0.03); border-style: dashed; }
+        .demo-wrapper .flow-step.waiting { opacity: 0.35; }
+        .demo-wrapper .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .demo-wrapper .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--dw-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+        .demo-wrapper .flow-step.pass .step-num { background: #238636; }
+        .demo-wrapper .flow-step.fail .step-num { background: #da3633; }
+        .demo-wrapper .flow-step.ask .step-num { background: #9e6a03; }
+        .demo-wrapper .flow-step.skip .step-num { background: var(--dw-text-subtle); }
+        .demo-wrapper .step-title { font-weight: 600; font-size: 14px; }
+        .demo-wrapper .step-desc { font-size: 12px; color: var(--dw-text-muted); line-height: 1.4; }
+        .demo-wrapper .step-result { margin-top: 6px; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: none; }
+        .demo-wrapper .step-result.show { display: block; }
+        .demo-wrapper .step-result.pass { background: rgba(63,185,80,0.1); color: var(--dw-green); }
+        .demo-wrapper .step-result.fail { background: rgba(248,81,73,0.1); color: var(--dw-red); }
+        .demo-wrapper .step-result.ask { background: var(--dw-yellow-muted); color: var(--dw-yellow); }
+        .demo-wrapper .step-result.skip { background: rgba(139,148,158,0.08); color: var(--dw-text-muted); }
+        .demo-wrapper .flow-arrow { text-align: center; color: var(--dw-border); font-size: 16px; margin: 1px 0; }
+        .demo-wrapper .flow-arrow.pass { color: var(--dw-green); }
+        .demo-wrapper .flow-arrow.fail { color: var(--dw-red); }
+        .demo-wrapper .flow-arrow.skip { color: var(--dw-text-subtle); }
+
+        /* Permission dialog */
+        .demo-wrapper .perm-dialog { display: none; margin-top: 10px; padding: 12px; background: var(--dw-bg); border: 1px solid var(--dw-yellow); border-radius: 8px; }
+        .demo-wrapper .perm-dialog.show { display: block; animation: apFadeIn 0.3s; }
+        .demo-wrapper .perm-dialog p { font-size: 13px; margin-bottom: 8px; color: var(--dw-yellow); }
+        .demo-wrapper .perm-dialog .label-row { font-size: 11px; color: var(--dw-text-muted); margin-bottom: 6px; }
+        .demo-wrapper .scope-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .demo-wrapper .scope-btn { width: auto; padding: 6px 14px; font-size: 12px; font-weight: 600; background: var(--dw-border-muted); border: 1px solid var(--dw-border); border-radius: 8px; color: var(--dw-text); cursor: pointer; font-family: inherit; text-transform: none; letter-spacing: 0; line-height: 1; box-shadow: none; }
+        .demo-wrapper .scope-btn:hover { background: var(--dw-border); border-color: var(--dw-pink); }
+        .demo-wrapper .scope-btn.deny-btn { border-color: var(--dw-red); color: var(--dw-red); }
+        .demo-wrapper .scope-btn.deny-btn:hover { background: rgba(248,81,73,0.1); }
+        @keyframes apFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stores */
+        .demo-wrapper .stores-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+        .demo-wrapper .store-panel { background: var(--dw-surface); border: 1px solid var(--dw-border); border-radius: 12px; padding: 16px; }
+        .demo-wrapper .store-panel h3 { font-size: 13px; font-weight: 600; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .demo-wrapper .store-panel .store-desc { font-size: 11px; color: var(--dw-text-subtle); margin-bottom: 10px; }
+        .demo-wrapper .store-panel.rbac-panel { border-color: #238636; }
+        .demo-wrapper .store-panel.rbac-panel h3 { color: var(--dw-green); }
+        .demo-wrapper .store-panel.perm-panel { border-color: #9e6a03; }
+        .demo-wrapper .store-panel.perm-panel h3 { color: var(--dw-yellow); }
+        .demo-wrapper table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .demo-wrapper th { text-align: left; padding: 5px 6px; color: var(--dw-text-muted); border-bottom: 1px solid var(--dw-border-muted); font-weight: 600; }
+        .demo-wrapper td { padding: 4px 6px; border-bottom: 1px solid var(--dw-border-muted); }
+        .demo-wrapper tr.hl { background: rgba(242,132,158,0.08); }
+        .demo-wrapper .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+        .demo-wrapper .tag-y { background: rgba(63,185,80,0.15); color: var(--dw-green); }
+        .demo-wrapper .tag-n { background: rgba(248,81,73,0.15); color: var(--dw-red); }
+        .demo-wrapper .tag-s { background: rgba(210,153,34,0.15); color: var(--dw-yellow); }
+        .demo-wrapper .tag-d { background: rgba(248,81,73,0.15); color: var(--dw-red); }
+        .demo-wrapper .tag-used { background: rgba(139,148,158,0.15); color: var(--dw-text-muted); }
+        .demo-wrapper .tag-skip { background: rgba(139,148,158,0.1); color: #6e7681; }
+
+        /* Log */
+        .demo-wrapper .log-panel { margin-top: 20px; }
+        .demo-wrapper .ap-log { background: var(--dw-bg); border: 1px solid var(--dw-border); border-radius: 8px; padding: 10px; max-height: 160px; overflow-y: auto; font-family: 'SF Mono', 'SFMono-Regular', Menlo, monospace; font-size: 11px; line-height: 1.6; }
+        .demo-wrapper .log-entry .time { color: var(--dw-text-subtle); }
+        .demo-wrapper .log-entry .pass { color: var(--dw-green); }
+        .demo-wrapper .log-entry .fail { color: var(--dw-red); }
+        .demo-wrapper .log-entry .ask { color: var(--dw-yellow); }
+        .demo-wrapper .log-entry .info { color: var(--dw-accent); }
+        .demo-wrapper .log-entry .skip { color: var(--dw-text-muted); }
+
+        @media (max-width: 768px) {
+            .demo-wrapper .sim-grid { grid-template-columns: 1fr; }
+            .demo-wrapper .stores-row { grid-template-columns: 1fr; }
+            .demo-wrapper .arch-box.proxy { min-width: auto; }
+        }
+
+        /* ── Three-step summary ── */
+        .how-section { max-width: 780px; margin: 2.5em auto; padding: 0 1em; }
+        .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; }
+        .how-step { text-align: center; }
+        .how-step .num-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: solid 2px #f2849e; color: #f2849e;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.7em; font-weight: 900; font-size: 0.85em;
+        }
+        .how-step h4 { font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 900; margin-bottom: 0.5em; color: #585858; }
+        .how-step p { font-size: 0.78em; font-weight: 300; color: #888; line-height: 1.6; margin: 0; }
+        @media (max-width: 600px) { .how-steps { grid-template-columns: 1fr; gap: 1.5em; } }
+    </style>
+</head>
+<body class="is-preload">
+    <div id="wrapper">
+        <header id="header">
+            <div class="inner">
+                <a href="../index.html" class="logo">
+                    <span class="symbol"><img src="../images/rabbit.svg" alt="" /></span>
+                    <span class="title">Zhaoyan Lin's Portfolio</span>
+                </a>
+                <nav><ul><li><a href="#menu">Menu</a></li></ul></nav>
+            </div>
+        </header>
+        <nav id="menu">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../project.html">Project</a></li>
+                <li><a href="../art.html">Art</a></li>
+                <li><a href="../other.html">Other</a></li>
+                <li><a href="../profile.html">Profile</a></li>
+            </ul>
+        </nav>
+
+        <div id="main">
+            <div class="inner">
+
+                <!-- Hero -->
+                <div class="ap-hero">
+                    <h1>Agent Auth Proxy</h1>
+                    <p class="subtitle">
+                        A unified auth layer for multi-agent systems. Human-initiated and autonomous calls
+                        flow through the same three-step proxy: RBAC, grant check, execute.
+                    </p>
+                    <div class="tech-badges">
+                        <span class="tech-badge">Role-Based Access</span>
+                        <span class="tech-badge">Scoped Grants</span>
+                        <span class="tech-badge">User + Headless</span>
+                        <span class="tech-badge">Interactive Consent</span>
+                    </div>
+                </div>
+
+                <!-- Concept cards -->
+                <div class="concept-section">
+                    <div class="concept-grid">
+                        <div class="concept-card">
+                            <h3>The Problem</h3>
+                            <p>Calls come from <span class="accent">two worlds</span>: a user in a chat session, or an autonomous agent running a plan at 3 AM. Traditional auth assumes a user is always present.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>The Insight</h3>
+                            <p>Two orthogonal checks: a <span class="accent">role ceiling</span> (what the role allows) and a <span class="accent">grant</span> (explicit allow/deny). No user? Skip roles, require a pre-authorized grant.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>Scoped Grants</h3>
+                            <p>Short-lived grants (<span class="accent">once, turn, session</span>) are user-scoped. Long-lived grants (<span class="accent">task, always</span>) are workspace-scoped — any caller matches, including headless agents.</p>
+                        </div>
+                        <div class="concept-card">
+                            <h3>Interactive Consent</h3>
+                            <p>No grant + user present? <span class="accent">Prompt in real-time</span> via chat. The response becomes a stored grant. No user? Deny and escalate.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Demo (dark panel) -->
+                <div class="demo-section">
+                    <h2 class="section-head">Architecture & Simulator</h2>
+                    <div class="demo-wrapper">
+                        <div class="ap-tabs">
+                            <div class="ap-tab active" onclick="switchTab(0)">Architecture</div>
+                            <div class="ap-tab" onclick="switchTab(1)">Simulator</div>
+                        </div>
+
+                        <!-- Tab 1: Architecture -->
+                        <div class="ap-tab-content active" id="aptab0">
+                            <div class="arch-row">
+                                <div class="arch-box user" style="min-width:220px;">
+                                    <h3>Has User</h3>
+                                    <p>Chat session, user-initiated call</p>
+                                </div>
+                                <div style="display:flex;align-items:center;color:#484f58;font-size:12px;padding:0 8px;">or</div>
+                                <div class="arch-box nouser" style="min-width:220px;">
+                                    <h3>No User</h3>
+                                    <p>Orchestrator, scheduled task, agent-to-agent</p>
+                                </div>
+                            </div>
+                            <div class="arch-arrow">&darr; <span class="label">CallerIdentity(userId?, workspaceId) + ExecutionContext(sessionId?, taskId?)</span></div>
+
+                            <div class="arch-row">
+                                <div class="arch-box proxy">
+                                    <h3>Auth Proxy (shared library)</h3>
+                                    <div class="proxy-inner">
+                                        <div class="proxy-step s1">
+                                            <h4>1. RBAC</h4>
+                                            <p>Has user? Check role.<br>No user? <b>Skip.</b></p>
+                                        </div>
+                                        <div style="display:flex;align-items:center;color:#484f58;">&rarr;</div>
+                                        <div class="proxy-step s2">
+                                            <h4>2. Grant</h4>
+                                            <p>Has grant? Apply it.<br>No grant + user? <b>Prompt.</b><br>No grant + no user? <b>Deny.</b></p>
+                                        </div>
+                                        <div style="display:flex;align-items:center;color:#484f58;">&rarr;</div>
+                                        <div class="proxy-step s3">
+                                            <h4>3. Execute</h4>
+                                            <p>Allowed &rarr; run the call.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="arch-row" style="margin-top:12px;">
+                                <div class="arch-box rbac">
+                                    <h3>Policy Engine (RBAC)</h3>
+                                    <p>Role &rarr; permitted actions</p>
+                                </div>
+                                <div class="arch-box grantstore">
+                                    <h3>Grant Store</h3>
+                                    <p>Allow/deny decisions at scoped granularity</p>
+                                </div>
+                            </div>
+
+                            <div class="arch-arrow" style="margin-top:8px;">&darr; <span class="label">downstream services</span></div>
+                            <div class="arch-row">
+                                <div class="arch-box service"><h3>Resource API</h3></div>
+                                <div class="arch-box service"><h3>Workspace API</h3></div>
+                                <div class="arch-box service"><h3>Storage API</h3></div>
+                                <div class="arch-box service"><h3>Review API</h3></div>
+                            </div>
+
+                            <div class="callout nouser" style="margin-top:24px;">
+                                <b>No user?</b> RBAC is skipped. Only a pre-authorized workspace-scoped grant (TASK or ALWAYS) can allow the call. Otherwise &rarr; denied, must escalate.
+                            </div>
+
+                            <div class="callout pink" style="margin-top:12px;">
+                                <b>Scope determines the key</b>
+                                <code>
+                                    <b>User-scoped:</b> ONCE | TURN | SESSION<br>
+                                    Key: workspaceId + grantedBy + action<br><br>
+                                    <b>Workspace-scoped:</b> TASK | ALWAYS<br>
+                                    Key: workspaceId + action
+                                </code>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Simulator -->
+                        <div class="ap-tab-content" id="aptab1">
+                            <div class="sim-grid">
+                                <div>
+                                    <div class="panel">
+                                        <h2>Request</h2>
+                                        <div class="control-group">
+                                            <label>Has user?</label>
+                                            <div class="toggle-row">
+                                                <label class="toggle">
+                                                    <input type="checkbox" id="hasUser" checked onchange="onHasUserChange()">
+                                                    <span class="slider"></span>
+                                                </label>
+                                                <div class="toggle-label">
+                                                    <span id="hasUserLabel">Yes</span>
+                                                    <span class="hint" id="hasUserHint">RBAC applies, can prompt</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="control-group">
+                                            <label>Role</label>
+                                            <select id="role">
+                                                <option value="ADMIN">Admin</option>
+                                                <option value="EDITOR" selected>Editor</option>
+                                                <option value="VIEWER">Viewer</option>
+                                            </select>
+                                        </div>
+                                        <div class="control-group">
+                                            <label>Action</label>
+                                            <select id="action">
+                                                <option value="READ_RESOURCE">Read Resource</option>
+                                                <option value="UPDATE_RESOURCE" selected>Update Resource</option>
+                                                <option value="CREATE_RESOURCE">Create Resource</option>
+                                                <option value="UPLOAD_FILE">Upload File</option>
+                                                <option value="APPROVE_REVIEW">Approve Review</option>
+                                                <option value="DELETE_WORKSPACE">Delete Workspace</option>
+                                            </select>
+                                        </div>
+                                        <button class="sim-btn primary" onclick="runProxy()">Run Through Proxy</button>
+                                        <button class="sim-btn preauth" style="margin-top:4px;" onclick="preauthorize()">Pre-authorize</button>
+                                        <button class="sim-btn danger" onclick="clearGrants()">Clear Grants</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="panel">
+                                        <h2>Proxy Flow</h2>
+                                        <div class="flow-step waiting" id="step1">
+                                            <div class="step-header">
+                                                <div class="step-num">1</div>
+                                                <div class="step-title">RBAC Check</div>
+                                            </div>
+                                            <div class="step-desc">Role permits this action? <b>Skipped if no user.</b></div>
+                                            <div class="step-result" id="step1-result"></div>
+                                        </div>
+                                        <div class="flow-arrow" id="arrow1">|</div>
+                                        <div class="flow-step waiting" id="step2">
+                                            <div class="step-header">
+                                                <div class="step-num">2</div>
+                                                <div class="step-title">Grant Check</div>
+                                            </div>
+                                            <div class="step-desc">Existing allow or deny for this action?</div>
+                                            <div class="step-result" id="step2-result"></div>
+                                            <div class="perm-dialog" id="perm-dialog">
+                                                <p>Agent wants to: <b id="perm-action"></b></p>
+                                                <div class="label-row">Allow (user-scoped):</div>
+                                                <div class="scope-btns" style="margin-bottom:6px;">
+                                                    <button class="scope-btn" onclick="grantPerm('ONCE','ALLOW')">Once</button>
+                                                    <button class="scope-btn" onclick="grantPerm('TURN','ALLOW')">This Turn</button>
+                                                    <button class="scope-btn" onclick="grantPerm('SESSION','ALLOW')">This Session</button>
+                                                </div>
+                                                <div class="label-row">Allow (workspace-scoped):</div>
+                                                <div class="scope-btns" style="margin-bottom:6px;">
+                                                    <button class="scope-btn" onclick="grantPerm('ALWAYS','ALLOW')">Always</button>
+                                                </div>
+                                                <div class="label-row">Deny:</div>
+                                                <div class="scope-btns">
+                                                    <button class="scope-btn deny-btn" onclick="grantPerm('ONCE','DENY')">Deny Once</button>
+                                                    <button class="scope-btn deny-btn" onclick="grantPerm('SESSION','DENY')">Deny Session</button>
+                                                    <button class="scope-btn deny-btn" onclick="grantPerm('ALWAYS','DENY')">Deny Always</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flow-arrow" id="arrow2">|</div>
+                                        <div class="flow-step waiting" id="step3">
+                                            <div class="step-header">
+                                                <div class="step-num">3</div>
+                                                <div class="step-title">Execute</div>
+                                            </div>
+                                            <div class="step-desc">Both checks passed. Call the service.</div>
+                                            <div class="step-result" id="step3-result"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stores-row">
+                                <div class="store-panel rbac-panel">
+                                    <h3>Policy Engine (RBAC)</h3>
+                                    <p class="store-desc">Role &rarr; permitted actions. Only when there's a user.</p>
+                                    <table>
+                                        <thead><tr><th>Role</th><th>Read</th><th>Update</th><th>Create</th><th>Upload</th><th>Approve</th><th>Delete</th></tr></thead>
+                                        <tbody id="rbac-table"></tbody>
+                                    </table>
+                                </div>
+                                <div class="store-panel perm-panel">
+                                    <h3>Grant Store</h3>
+                                    <p class="store-desc">User-scoped or workspace-scoped grants.</p>
+                                    <table>
+                                        <thead><tr><th>Action</th><th>Decision</th><th>Scope</th><th>Type</th><th>By</th><th>Status</th></tr></thead>
+                                        <tbody id="perm-table"></tbody>
+                                    </table>
+                                    <div id="perm-empty" style="text-align:center;color:#484f58;padding:16px;font-size:12px;">No grants yet.</div>
+                                </div>
+                            </div>
+
+                            <div class="panel log-panel">
+                                <h2>Audit Log</h2>
+                                <div class="ap-log" id="log"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How it works -->
+                <div class="how-section">
+                    <h2 class="section-head">The Three-Step Flow</h2>
+                    <div class="how-steps">
+                        <div class="how-step">
+                            <div class="num-circle">1</div>
+                            <h4>RBAC</h4>
+                            <p>Check the user's role against the policy engine. This is the ceiling — no grant can exceed it.</p>
+                        </div>
+                        <div class="how-step">
+                            <div class="num-circle">2</div>
+                            <h4>Grant</h4>
+                            <p>Look up existing grants. None found + user present? Prompt. None + no user? Deny.</p>
+                        </div>
+                        <div class="how-step">
+                            <div class="num-circle">3</div>
+                            <h4>Execute</h4>
+                            <p>Both passed. Forward the call downstream with the caller's identity.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div class="inner">
+                <section>
+                    <h2>Follow</h2>
+                    <ul class="icons">
+                        <li><a href="https://www.instagram.com/youtuyy/" class="icon style2 fa-instagram"><span class="label">Instagram</span></a></li>
+                        <li><a href="https://github.com/youtuyy" class="icon style2 fa-github"><span class="label">GitHub</span></a></li>
+                        <li><a href="mailto:linzhaoyan@hotmail.com" class="icon style2 fa-envelope-o"><span class="label">Email</span></a></li>
+                    </ul>
+                </section>
+                <ul class="copyright"><li>&copy; Zhaoyan Lin 2026</li></ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/browser.min.js"></script>
+    <script src="../assets/js/breakpoints.min.js"></script>
+    <script src="../assets/js/util.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script>
+    const RBAC = {
+        ADMIN:  { READ_RESOURCE:true, UPDATE_RESOURCE:true, CREATE_RESOURCE:true, UPLOAD_FILE:true, APPROVE_REVIEW:true, DELETE_WORKSPACE:true },
+        EDITOR: { READ_RESOURCE:true, UPDATE_RESOURCE:true, CREATE_RESOURCE:true, UPLOAD_FILE:true, APPROVE_REVIEW:false, DELETE_WORKSPACE:false },
+        VIEWER: { READ_RESOURCE:true, UPDATE_RESOURCE:false, CREATE_RESOURCE:false, UPLOAD_FILE:false, APPROVE_REVIEW:false, DELETE_WORKSPACE:false },
+    };
+
+    let grants = [];
+    let pendingAction = null;
+    const contextId = 'session-001';
+    const userId = 'user-123';
+
+    const USER_SCOPES = new Set(['ONCE', 'TURN', 'SESSION']);
+    function isUserScoped(scope) { return USER_SCOPES.has(scope); }
+
+    function switchTab(idx) {
+        document.querySelectorAll('.ap-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+        document.querySelectorAll('.ap-tab-content').forEach((t,i) => t.classList.toggle('active', i===idx));
+        if (idx === 1) { renderRBAC(); renderGrants(); }
+    }
+
+    function onHasUserChange() {
+        const hasUser = document.getElementById('hasUser').checked;
+        document.getElementById('role').disabled = !hasUser;
+        document.getElementById('hasUserLabel').textContent = hasUser ? 'Yes' : 'No';
+        document.getElementById('hasUserHint').textContent = hasUser ? 'RBAC applies, can prompt' : 'RBAC skipped, no prompting';
+        renderRBAC();
+    }
+
+    function renderRBAC() {
+        const role = document.getElementById('role').value;
+        const hasUser = document.getElementById('hasUser').checked;
+        const tbody = document.getElementById('rbac-table');
+        tbody.innerHTML = '';
+        for (const [r, perms] of Object.entries(RBAC)) {
+            const cur = r === role && hasUser;
+            const tr = document.createElement('tr');
+            if (cur) tr.classList.add('hl');
+            tr.style.opacity = hasUser ? '1' : '0.3';
+            tr.innerHTML = '<td style="font-weight:' + (cur?'700':'400') + '">' + r + '</td>' +
+                Object.entries(perms).map(([a,v]) =>
+                    '<td><span class="tag ' + (v?'tag-y':'tag-n') + '">' + (v?'YES':'NO') + '</span></td>'
+                ).join('');
+            tbody.appendChild(tr);
+        }
+    }
+
+    function renderGrants() {
+        const tbody = document.getElementById('perm-table');
+        const empty = document.getElementById('perm-empty');
+        tbody.innerHTML = '';
+        if (!grants.length) { empty.style.display = 'block'; return; }
+        empty.style.display = 'none';
+        for (const g of grants) {
+            const tr = document.createElement('tr');
+            const decTag = g.decision === 'ALLOW' ? 'tag-y' : 'tag-d';
+            const statusTag = g.consumed ? 'tag-used' : (g.decision === 'ALLOW' ? 'tag-y' : 'tag-d');
+            const statusText = g.consumed ? 'USED' : 'ACTIVE';
+            const typeTag = isUserScoped(g.scope) ? 'tag-s' : 'tag-skip';
+            const typeText = isUserScoped(g.scope) ? 'user' : 'workspace';
+            tr.innerHTML = '<td><b>' + g.action + '</b></td>' +
+                '<td><span class="tag ' + decTag + '">' + g.decision + '</span></td>' +
+                '<td><span class="tag tag-s">' + g.scope + '</span></td>' +
+                '<td><span class="tag ' + typeTag + '">' + typeText + '</span></td>' +
+                '<td style="font-size:10px;color:#6e7681;">' + (g.grantedBy || '\u2014') + '</td>' +
+                '<td><span class="tag ' + statusTag + '">' + statusText + '</span></td>';
+            tbody.appendChild(tr);
+        }
+    }
+
+    function addLog(msg, type) {
+        const log = document.getElementById('log');
+        const time = new Date().toLocaleTimeString();
+        log.innerHTML += '<div class="log-entry"><span class="time">[' + time + ']</span> <span class="' + type + '">' + msg + '</span></div>';
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function resetSteps() {
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById('step' + i).className = 'flow-step waiting';
+            const r = document.getElementById('step' + i + '-result');
+            r.className = 'step-result'; r.style.display = 'none';
+        }
+        document.getElementById('arrow1').className = 'flow-arrow';
+        document.getElementById('arrow2').className = 'flow-arrow';
+        document.getElementById('perm-dialog').classList.remove('show');
+    }
+
+    function setStep(num, status, text) {
+        document.getElementById('step' + num).className = 'flow-step ' + status;
+        if (text) {
+            const r = document.getElementById('step' + num + '-result');
+            r.textContent = text; r.className = 'step-result ' + status + ' show';
+        }
+        if (num > 1) document.getElementById('arrow' + (num-1)).className = 'flow-arrow ' + status;
+    }
+
+    function findGrant(action, hasUser) {
+        const wsGrant = grants.find(g => g.action === action && !g.consumed &&
+            !isUserScoped(g.scope) && (g.scope === 'ALWAYS' || g.scopeCtx === contextId));
+        if (wsGrant) return wsGrant;
+        if (hasUser) {
+            return grants.find(g => g.action === action && !g.consumed &&
+                isUserScoped(g.scope) && g.scopeCtx === contextId);
+        }
+        return null;
+    }
+
+    function runProxy() {
+        resetSteps();
+        const hasUser = document.getElementById('hasUser').checked;
+        const role = document.getElementById('role').value;
+        const action = document.getElementById('action').value;
+        const callerDesc = hasUser ? 'user (' + role + ')' : 'no user (system)';
+        addLog('&rarr; <span class="info">' + action + '</span> as ' + callerDesc, 'info');
+
+        setTimeout(() => {
+            if (!hasUser) {
+                setStep(1, 'skip', 'SKIPPED \u2014 no user');
+                addLog('RBAC: <span class="skip">SKIPPED</span>', 'skip');
+            } else {
+                const perms = RBAC[role] || {};
+                if (!perms[action]) {
+                    setStep(1, 'fail', 'DENIED \u2014 ' + role + ' cannot ' + action);
+                    addLog('RBAC: <span class="fail">DENIED</span> \u2014 role ceiling', 'fail');
+                    return;
+                }
+                setStep(1, 'pass', role + ' permits ' + action);
+                addLog('RBAC: <span class="pass">PASS</span>', 'pass');
+            }
+
+            setTimeout(() => {
+                const grant = findGrant(action, hasUser);
+                if (grant) {
+                    if (grant.decision === 'DENY') {
+                        setStep(2, 'fail', 'DENIED \u2014 previously denied (' + grant.scope + ')');
+                        addLog('Grant: <span class="fail">DENIED</span> (' + grant.scope + ')', 'fail');
+                        return;
+                    }
+                    setStep(2, 'pass', 'Grant: ' + grant.decision + ' at ' + grant.scope);
+                    addLog('Grant: <span class="pass">ALLOWED</span> (' + grant.scope + ')', 'pass');
+                    if (grant.scope === 'ONCE') { grant.consumed = true; renderGrants(); }
+                    setTimeout(() => {
+                        setStep(3, 'pass', 'Executed: ' + action);
+                        addLog('<span class="pass">EXECUTED</span>', 'pass');
+                    }, 400);
+                } else if (!hasUser) {
+                    setStep(2, 'fail', 'DENIED \u2014 no grant, no user to prompt');
+                    addLog('Grant: <span class="fail">DENIED</span> \u2014 no grant, no user', 'fail');
+                } else {
+                    setStep(2, 'ask', 'No grant \u2014 prompting user');
+                    addLog('Grant: <span class="ask">NEEDS_PERMISSION</span>', 'ask');
+                    document.getElementById('perm-action').textContent = action;
+                    document.getElementById('perm-dialog').classList.add('show');
+                    pendingAction = action;
+                }
+            }, 500);
+        }, 400);
+        renderRBAC(); renderGrants();
+    }
+
+    function grantPerm(scope, decision) {
+        const action = pendingAction;
+        const scopeCtx = scope === 'ALWAYS' ? null : contextId;
+        grants.push({ action, decision, scope, scopeCtx, grantedBy: userId, consumed:false });
+        renderGrants();
+        document.getElementById('perm-dialog').classList.remove('show');
+        addLog('User: <span class="' + (decision==='ALLOW'?'pass':'fail') + '">' + decision + '</span> ' + action + ' (' + scope + ')', decision==='ALLOW'?'pass':'fail');
+
+        if (decision === 'DENY') {
+            setStep(2, 'fail', 'User denied (' + scope + ')');
+        } else {
+            setStep(2, 'pass', 'User allowed (' + scope + ')');
+            setTimeout(() => {
+                setStep(3, 'pass', 'Executed: ' + action);
+                addLog('<span class="pass">EXECUTED</span>', 'pass');
+                if (scope === 'ONCE') { grants[grants.length-1].consumed = true; renderGrants(); }
+            }, 400);
+        }
+        pendingAction = null;
+    }
+
+    function preauthorize() {
+        const action = document.getElementById('action').value;
+        grants.push({ action, decision:'ALLOW', scope:'ALWAYS', scopeCtx:null, grantedBy:'admin', consumed:false });
+        renderGrants();
+        addLog('Pre-authorized: <span class="pass">ALLOW</span> ' + action + ' (ALWAYS, workspace-scoped)', 'pass');
+    }
+
+    function clearGrants() { grants = []; renderGrants(); addLog('Grants cleared', 'info'); }
+
+    document.getElementById('role').addEventListener('change', renderRBAC);
+    document.getElementById('action').addEventListener('change', renderRBAC);
+    renderRBAC();
+    </script>
+</body>
+</html>
